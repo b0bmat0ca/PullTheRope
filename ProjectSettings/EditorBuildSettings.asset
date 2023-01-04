@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Scenes/SampleScene.unity
+    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/ProtoType/Gun.unity
+    guid: 8687d059b27c3ef409e87ba4a22af562
+  m_configObjects:
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: ca7c1021ce0244d4c91b11a573bd5c55,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: eeaa594c49b7aca4f98e02b2b9869eb0,
+      type: 2}
