@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Obi;
 using UniRx;
-using Oculus.Interaction;
 
 public class GunController : MonoBehaviour
 {
     [Header("紐"), SerializeField] private ObiRope rope;
-    [Header("トリガー"), SerializeField] private Grabbable trigger;
     [Header("発射口の位置"), SerializeField] private Transform muzzle;
     [Header("弾倉"), SerializeField] private MagazineCartridgeController magazineCartridge;
 
@@ -25,6 +23,8 @@ public class GunController : MonoBehaviour
 
     private ReactiveProperty<float> ropeLength = new(); // 紐の長さ監視
 
+    private IInputEventProvider inputProvider;
+
     private void Awake()
     {
         ropeLength.AddTo(this);
@@ -34,6 +34,8 @@ public class GunController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        inputProvider= GetComponent<IInputEventProvider>();
+
         defaultRopeLength = rope.CalculateLength(); // 0.3
         ropeLength.Value = defaultRopeLength;
 
@@ -58,7 +60,7 @@ public class GunController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (trigger.GrabPoints.Count > 0)
+        if (inputProvider.IsGrab.Value)
         {
             ropeLength.Value = rope.CalculateLength();
 
@@ -102,12 +104,12 @@ public class GunController : MonoBehaviour
     {
 #if !UNITY_EDITOR
         // 握られていない場合は、発射しない
-        if (trigger.GrabPoints.Count == 0)
+        if (!inputProvider.IsGrab.Value)
         {
             return;
         }
 #endif
 
-        magazineCartridge.bulletPool.Get().Fire(muzzle.forward * bulletSpeed, magazineCartridge.bulletPool).Forget();
+        magazineCartridge.bulletPool.Get().Fire(muzzle.forward * bulletSpeed);
     }
 }

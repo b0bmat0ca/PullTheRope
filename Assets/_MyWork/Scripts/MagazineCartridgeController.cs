@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -22,6 +23,15 @@ public class MagazineCartridgeController : MonoBehaviour
 
         foreach (Bullet bullet in bullets)
         {
+            // リリース状態を購読
+            bullet.onRelease
+                .Where(x => x)
+                .Subscribe(_ =>
+                {
+                    bullet.onRelease.Value = false;
+                    bulletPool.Release(bullet);
+                }).AddTo(this);
+
             bullet.gameObject.SetActive(false);
         }
 
