@@ -6,16 +6,22 @@ using RayFire;
 [RequireComponent(typeof(AudioSource))]
 public class Target : MonoBehaviour
 {
+    [SerializeField] protected TargetData targetData;
     [SerializeField] protected Collider colider;
     [SerializeField] protected RayfireRigid rayFireRigid;
     [SerializeField] protected float destroyTime = 5.0f;
 
     protected MeshRenderer[] shatterMesh;   // RayFire Shutter で事前に粉砕されたオブジェクトの配列
 
-    private AudioSource audioSource;
+    protected AudioSource audioSource;
+
+    protected string _name;
+    protected int point;
 
     protected virtual void Awake()
     {
+        _name = targetData.Name;
+        point = targetData.Point;
         audioSource = GetComponent<AudioSource>();
     }
 
