@@ -4,31 +4,30 @@ using UniRx;
 using UnityEngine;
 
 [RequireComponent(typeof(CommonUtility))]
-public abstract class GameStateManager : MonoBehaviour
+public class GameStateManager : MonoBehaviour
 {
-    public ReactiveProperty<GameState> gameState = new(GameState.Start); // ゲームの進行状態
+    public IReadOnlyReactiveProperty<GameState> State => gameState;
+    private ReactiveProperty<GameState> gameState = new(GameState.Loading); // ゲームの進行状態
 
-    protected CancellationTokenSource gameStateTokenSource = new();
+    [SerializeField] private GunController gunController;
 
-    protected virtual void OnDestroy()
-    {
-        gameStateTokenSource.Cancel();
-    }
-
-    protected virtual void Awake()
+    private void Awake()
     {
         gameState.AddTo(this);
     }
 
     // Start is called before the first frame update
-    protected virtual void Start()
+    void Start()
     {
-        // ゲームの進行状態を購読する
-        gameState.Subscribe(_ => OnChangeState()).AddTo(this);
+        // 最初にトリガーを触ったタイミングでゲームスタート
+        gunController.OnFirstGrabAsync
+            .Subscribe(_ => gameState.Value = GameState.Start)
+            .AddTo(this);
     }
 
-    /// <summary>
-    /// GameStateが変化した場合の処理を記載
-    /// </summary>
-    protected abstract void OnChangeState();
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 }

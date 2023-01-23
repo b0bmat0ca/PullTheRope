@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using Obi;
 using UniRx;
+using System;
 
 public class GunController : MonoBehaviour
 {
+    public IObservable<bool> OnFirstGrabAsync => onFirstGrabAsyncSubject;
+    private readonly AsyncSubject<bool> onFirstGrabAsyncSubject = new();
+
     [Header("紐"), SerializeField] private ObiRope rope;
     [Header("発射口の位置"), SerializeField] private Transform muzzle;
     [Header("弾倉"), SerializeField] private MagazineCartridgeController magazineCartridge;
 
     [Header("鉄砲のパワー"), SerializeField] private float gunPower = 20f;
     [Header("発射する紐の長さ"), SerializeField] private float fireRopeLength = 0.4f;
+
 
     private float defaultRopeLength;    // 初期の紐の長さ
     private float resetRopeLength;  // 発射計測を開始する紐の長さ
@@ -35,6 +40,14 @@ public class GunController : MonoBehaviour
     void Start()
     {
         inputProvider= GetComponent<IInputEventProvider>();
+        inputProvider.IsGrab
+            .Where(x => x)
+            .First()
+            .Subscribe(_ =>
+            {
+                onFirstGrabAsyncSubject.OnNext(true);
+                onFirstGrabAsyncSubject.OnCompleted();
+            }).AddTo(this);
 
         defaultRopeLength = rope.CalculateLength(); // 0.3
         ropeLength.Value = defaultRopeLength;
