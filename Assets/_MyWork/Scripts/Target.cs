@@ -12,10 +12,12 @@ public class Target : MonoBehaviour
 
     protected MeshRenderer[] shatterMesh;   // RayFire Shutter で事前に粉砕されたオブジェクトの配列
 
+    private Camera mainCamera;
     private AudioSource audioSource;
 
     protected virtual void Awake()
     {
+        mainCamera = Camera.main;
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -28,7 +30,7 @@ public class Target : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
-        
+        transform.LookAt(mainCamera.transform);
     }
 
     protected virtual void OnCollisionEnter(Collision collision)
