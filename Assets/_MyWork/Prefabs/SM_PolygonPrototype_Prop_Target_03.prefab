@@ -2052,6 +2052,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 192a00da5c9822847a57fc295769059b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetData: {fileID: 11400000, guid: 186b600727978a548b5fd1fe4ac1dddb, type: 2}
   colider: {fileID: 816502542086211624}
   rayFireRigid: {fileID: 6920096486019086241}
   destroyTime: 5
