@@ -7,8 +7,11 @@ using System;
 
 public class GunController : MonoBehaviour
 {
-    public IObservable<bool> OnFirstGrabAsync => onFirstGrabAsyncSubject;
-    private readonly AsyncSubject<bool> onFirstGrabAsyncSubject = new();
+    public IObservable<bool> OnFirstTurretGrabAsync => onFirstTurretGrabAsyncSubject;
+    private readonly AsyncSubject<bool> onFirstTurretGrabAsyncSubject = new();
+
+    public IObservable<bool> OnFirstTriggerGrabAsync => onFirstTriggerGrabAsyncSubject;
+    private readonly AsyncSubject<bool> onFirstTriggerGrabAsyncSubject = new();
 
     [Header("紐"), SerializeField] private ObiRope rope;
     [Header("発射口の位置"), SerializeField] private Transform muzzle;
@@ -40,13 +43,25 @@ public class GunController : MonoBehaviour
     void Start()
     {
         inputProvider= GetComponent<IInputEventProvider>();
-        inputProvider.IsGrab
+
+        // 砲塔を掴んだかを購読(初回のみ)
+        inputProvider.IsTurretGrab
             .Where(x => x)
             .First()
             .Subscribe(_ =>
             {
-                onFirstGrabAsyncSubject.OnNext(true);
-                onFirstGrabAsyncSubject.OnCompleted();
+                onFirstTurretGrabAsyncSubject.OnNext(true);
+                onFirstTurretGrabAsyncSubject.OnCompleted();
+            }).AddTo(this);
+
+        // トリガーを掴んだかを購読(初回のみ)
+        inputProvider.IsTriggerGrab
+            .Where(x => x)
+            .First()
+            .Subscribe(_ =>
+            {
+                onFirstTriggerGrabAsyncSubject.OnNext(true);
+                onFirstTriggerGrabAsyncSubject.OnCompleted();
             }).AddTo(this);
 
         defaultRopeLength = rope.CalculateLength(); // 0.3
@@ -73,7 +88,7 @@ public class GunController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (inputProvider.IsGrab.Value)
+        if (inputProvider.IsTriggerGrab.Value)
         {
             ropeLength.Value = rope.CalculateLength();
 
@@ -117,7 +132,7 @@ public class GunController : MonoBehaviour
     {
 #if !UNITY_EDITOR
         // 握られていない場合は、発射しない
-        if (!inputProvider.IsGrab.Value)
+        if (!inputProvider.IsTriggerGrab.Value)
         {
             return;
         }

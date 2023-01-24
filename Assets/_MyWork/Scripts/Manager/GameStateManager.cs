@@ -20,7 +20,7 @@ public class GameStateManager : MonoBehaviour
     void Start()
     {
         // 最初にトリガーを触ったタイミングでゲームスタート
-        gunController.OnFirstGrabAsync
+        gunController.OnFirstTriggerGrabAsync
             .Subscribe(_ => gameState.Value = GameState.Start)
             .AddTo(this);
     }
