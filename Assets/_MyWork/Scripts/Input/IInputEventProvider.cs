@@ -5,8 +5,9 @@ using UnityEngine;
 
 public interface IInputEventProvider
 {
-    IReadOnlyReactiveProperty<bool> IsTurretGrab { get; }
+    public IReadOnlyReactiveProperty<bool> IsTurretGrab { get; }
 
-    IReadOnlyReactiveProperty<bool> IsTriggerGrab { get; }
-    
+    public TurretGrabbedHand TurretGrabbed { get; }
+
+    public IReadOnlyReactiveProperty<bool> IsTriggerGrab { get; }
 }
