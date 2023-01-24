@@ -788,7 +788,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: OBI_ONI_SUPPORTED
+    Android: OBI_ONI_SUPPORTED;UNITASK_DOTWEEN_SUPPORT
     Standalone: OBI_ONI_SUPPORTED
     iPhone: OBI_ONI_SUPPORTED
   additionalCompilerArguments: {}
