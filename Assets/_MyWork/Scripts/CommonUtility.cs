@@ -9,13 +9,13 @@ using UnityEngine.SceneManagement;
 
 public sealed class CommonUtility : MonoBehaviour
 {
-    public static CommonUtility Util { get; private set; }
+    public static CommonUtility Instance { get; private set; }
 
     private void Awake()
     {
-        if (Util == null)
+        if (Instance == null)
         {
-            Util = this;
+            Instance = this;
         }
         else
         {

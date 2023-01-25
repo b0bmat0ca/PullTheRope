@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee66eea4d9a2b384eb99d0c4132de66b, type: 3}
   m_Name: SM_PolygonPrototype_Prop_Target_03
   m_EditorClassIdentifier: 
-  _name: 
-  point: 0
+  _name: SM_PolygonPrototype_Prop_Target_03
+  point: 5
