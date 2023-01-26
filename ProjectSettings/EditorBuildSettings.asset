@@ -11,9 +11,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/ProtoType/Cannon.unity
     guid: ad5692f6f53d921489785ed6f2d31cc1
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/ProtoType/MR.unity
     guid: 495d7999e86290244af7da2b86e925c2
+  - enabled: 1
+    path: Assets/Scenes/ProtoType/MR2.unity
+    guid: c7bbe9f538d54a4459fe9c46f94fd99b
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: ca7c1021ce0244d4c91b11a573bd5c55,
       type: 2}

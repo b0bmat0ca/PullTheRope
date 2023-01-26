@@ -44,9 +44,11 @@ public class PassthroughRoom : MonoBehaviour
             {
                 OVRSemanticClassification classification = sceneAnchor.GetComponent<OVRSemanticClassification>();
 
-                if (classification.Contains(OVRSceneManager.Classification.WallFace) ||
-                    classification.Contains(OVRSceneManager.Classification.Ceiling) ||
+                if (//classification.Contains(OVRSceneManager.Classification.Ceiling) ||
+                    //classification.Contains(OVRSceneManager.Classification.Desk) ||
                     classification.Contains(OVRSceneManager.Classification.DoorFrame) ||
+                    //classification.Contains(OVRSceneManager.Classification.Other) ||
+                    classification.Contains(OVRSceneManager.Classification.WallFace) ||
                     classification.Contains(OVRSceneManager.Classification.WindowFrame))
                 {
                     Destroy(sceneAnchor.gameObject);
@@ -66,12 +68,14 @@ public class PassthroughRoom : MonoBehaviour
                             cornerPoints = boundary.ToList()
                                 .ConvertAll<Vector3>(corner => new Vector3(-corner.x, corner.y, 0.0f));
 
+                            cornerPoints.Reverse();
                             for (int i = 0; i < cornerPoints.Count; i++)
                             {
                                 cornerPoints[i] = sceneAnchor.transform.TransformPoint(cornerPoints[i]);
                             }
                         }
                     }
+                    Destroy(sceneAnchor.gameObject);
                 }
             }
         }
