@@ -1919,10 +1919,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6920096485871294252}
   - component: {fileID: 6920096485871294254}
-  - component: {fileID: -4205980879781571637}
+  - component: {fileID: 6920096485871294253}
   - component: {fileID: 816502542086211624}
   m_Layer: 0
-  m_Name: SM_PolygonPrototype_Prop_Target_03
+  m_Name: SM_PolygonPrototype_Prop_Target_03 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2040,7 +2040,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &-4205980879781571637
+--- !u!114 &6920096485871294253
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2049,16 +2049,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 6920096485871294250}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 54af27ac76f39ad4a83a2be50d927677, type: 3}
+  m_Script: {fileID: 11500000, guid: 192a00da5c9822847a57fc295769059b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subject: {fileID: 0}
   targetData: {fileID: 11400000, guid: 186b600727978a548b5fd1fe4ac1dddb, type: 2}
   colider: {fileID: 816502542086211624}
-  destroyTime: 5
-  particleList: []
-  seList: []
   rayFireRigid: {fileID: 6920096486019086241}
+  destroyTime: 5
 --- !u!65 &816502542086211624
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2428,7 +2425,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6920096486019086240
 Transform:
   m_ObjectHideFlags: 0
