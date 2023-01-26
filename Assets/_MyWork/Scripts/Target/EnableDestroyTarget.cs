@@ -50,12 +50,4 @@ public class EnableDestroyTarget : Target
     {
         
     }
-
-    private  void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Bullet"))
-        {
-            DestroyTarget().Forget();
-        }
-    }
 }

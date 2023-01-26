@@ -75,7 +75,7 @@ public class PassthroughRoom : MonoBehaviour
                             }
                         }
                     }
-                    Destroy(sceneAnchor.gameObject);
+                    //Destroy(sceneAnchor.gameObject);
                 }
             }
         }
