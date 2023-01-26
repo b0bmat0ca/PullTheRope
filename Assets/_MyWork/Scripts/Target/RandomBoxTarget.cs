@@ -8,15 +8,13 @@ using UnityEngine;
 public class RandomBoxTarget : MonoBehaviour
 {
     [SerializeField] private CollisionEventSubject subject;
-
     [SerializeField] private GameObject boxPattern;
     [SerializeField] private Transform itemSpaawnPoint;
     [SerializeField] private GameObject[] items;
 
-
     private AudioSource audioSource;
 
-    void Awake()
+    private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
     }
