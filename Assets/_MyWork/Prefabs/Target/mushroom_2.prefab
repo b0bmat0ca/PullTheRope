@@ -351,7 +351,7 @@ Transform:
   - {fileID: 3187710891485357720}
   - {fileID: 3185026045370769188}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!205 &3380842868832138868
 LODGroup:
@@ -488,6 +488,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5da514b10f5f0f741916bbb6e6277f1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  subject: {fileID: 3185026045370769189}
   targetData: {fileID: 11400000, guid: 02bfa784f098b7c42b08a6cc5c2fb1ba, type: 2}
   colider: {fileID: 3185026045370769194}
   destroyTime: 5

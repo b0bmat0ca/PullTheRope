@@ -5,6 +5,7 @@ using RayFire;
 using UniRx;
 using Cysharp.Threading.Tasks;
 using System;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 
 public class EnableDestroyTarget : Target
@@ -31,10 +32,17 @@ public class EnableDestroyTarget : Target
         Destroy(gameObject);
     }
     #endregion
+
     // Start is called before the first frame update
     protected override void Start()
     {
         base.Start();
+
+        subject.OnCollisionEnterAsync
+            .Subscribe(_ =>
+            {
+                DestroyTarget().Forget();
+            }).AddTo(this);
     }
 
     // Update is called once per frame
