@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using RayFire;
 
-public class PassthroughTarget : Target
+public class PassthroughTarget : EnableDestroyTarget
 {
     private Camera mainCamera;
 
@@ -20,9 +19,8 @@ public class PassthroughTarget : Target
     }
 
     // Update is called once per frame
-    protected override void Update()
+    protected virtual void Update()
     {
-        base.Update();
         transform.LookAt(mainCamera.transform);
     }
 }
