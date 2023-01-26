@@ -47,7 +47,6 @@ public class GunController : MonoBehaviour
         // 砲塔を掴んだかを購読(初回のみ)
         inputProvider.IsTurretGrab
             .Where(x => x)
-            .First()
             .Subscribe(_ =>
             {
                 onFirstTurretGrabAsyncSubject.OnNext(true);
@@ -57,7 +56,6 @@ public class GunController : MonoBehaviour
         // トリガーを掴んだかを購読(初回のみ)
         inputProvider.IsTriggerGrab
             .Where(x => x)
-            .First()
             .Subscribe(_ =>
             {
                 onFirstTriggerGrabAsyncSubject.OnNext(true);
