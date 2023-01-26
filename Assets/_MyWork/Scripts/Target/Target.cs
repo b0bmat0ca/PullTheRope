@@ -10,6 +10,7 @@ public abstract class Target : MonoBehaviour
     [Header("Optional"), SerializeField] protected CollisionEventSubject subject;
     [SerializeField] protected TargetData targetData;
     [SerializeField] protected Collider colider;
+    public Collider TargetColider { get { return colider; } }
     [SerializeField] protected float destroyTime = 5.0f;
 
     // パーティクルリスト

@@ -27,6 +27,8 @@ public class DisableDestroyTarget : Target
     // Start is called before the first frame update
     protected override void Start()
     {
+        base.Start();
+
         subject.OnCollisionEnterAsync
             .Subscribe(_ =>
             {
