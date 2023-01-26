@@ -4,7 +4,7 @@ using UnityEngine;
 using RayFire;
 
 [RequireComponent(typeof(AudioSource))]
-public class Target : MonoBehaviour
+public class EnableDestroyTarget : MonoBehaviour
 {
     [SerializeField] protected TargetData targetData;
     [SerializeField] protected Collider colider;
