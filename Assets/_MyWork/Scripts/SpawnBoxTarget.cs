@@ -24,12 +24,15 @@ public class SpawnBoxTarget : MonoBehaviour
     {
         TargetMap target = targetList[Random.Range(0, targetList.Count)];
         GameObject obj = Instantiate(target.Target, transform.position + new Vector3(0, target.OffsetY, 0), Quaternion.identity);
-        GameObject child = obj.transform.GetChild(0).gameObject;
-        BoxCollider boxColider = obj.GetComponent<PassthroughTarget>().TargetColider as BoxCollider;
-        child.transform.localScale *= target.TargetScale;
-        boxColider.size *= target.TargetScale;
-        boxColider.gameObject.SetActive(true);
-        child.SetActive(true);
+        obj.SetActive(false);
+        obj.transform.localScale *= target.TargetScale;
+        obj.SetActive(true);
+        //GameObject child = obj.transform.GetChild(0).gameObject;
+        //BoxCollider boxColider = obj.GetComponent<PassthroughTarget>().TargetColider as BoxCollider;
+        //child.transform.localScale *= target.TargetScale;
+        //boxColider.size *= target.TargetScale;
+        //boxColider.gameObject.SetActive(true);
+        //child.SetActive(true);
     }
 
     // Update is called once per frame

@@ -26,7 +26,10 @@ public class RandomBoxTarget : MonoBehaviour
             .Subscribe(_ =>
             {
                 boxPattern.SetActive(false);
-                Instantiate(items[Random.Range(0, items.Length -1)], itemSpaawnPoint.position, Quaternion.identity);
+                GameObject obj = Instantiate(items[Random.Range(0, items.Length -1)], itemSpaawnPoint.position, Quaternion.identity);
+                obj.SetActive(false);
+                obj.transform.localScale = transform.localScale;
+                obj.SetActive(true);
             }).AddTo(this);
     }
 

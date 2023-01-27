@@ -63,6 +63,10 @@ MonoBehaviour:
       type: 3}
     offsetY: 1
     targetScale: 0.5
+  - target: {fileID: 7426213765296000560, guid: f2b351ae20bf49149affeac8a13c46f6,
+      type: 3}
+    offsetY: 1
+    targetScale: 0.25
 --- !u!1 &5590538625383954810
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,7 +130,7 @@ PrefabInstance:
     - target: {fileID: 6855284955390421634, guid: e0bf8d8938bcdf748abb40f72d7e9dd4,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.5
+      value: -0.6
       objectReference: {fileID: 0}
     - target: {fileID: 6855284955390421634, guid: e0bf8d8938bcdf748abb40f72d7e9dd4,
         type: 3}

@@ -44,16 +44,17 @@ public class PassthroughRoom : MonoBehaviour
             {
                 OVRSemanticClassification classification = sceneAnchor.GetComponent<OVRSemanticClassification>();
 
-                if (//classification.Contains(OVRSceneManager.Classification.Ceiling) ||
-                    //classification.Contains(OVRSceneManager.Classification.Desk) ||
-                    classification.Contains(OVRSceneManager.Classification.DoorFrame) ||
-                    //classification.Contains(OVRSceneManager.Classification.Other) ||
-                    classification.Contains(OVRSceneManager.Classification.WallFace) ||
-                    classification.Contains(OVRSceneManager.Classification.WindowFrame))
-                {
-                    Destroy(sceneAnchor.gameObject);
-                }
-                else if (classification.Contains(OVRSceneManager.Classification.Floor))
+                //if (//classification.Contains(OVRSceneManager.Classification.Ceiling) ||
+                //    //classification.Contains(OVRSceneManager.Classification.Desk) ||
+                //    classification.Contains(OVRSceneManager.Classification.DoorFrame) ||
+                //    //classification.Contains(OVRSceneManager.Classification.Other) ||
+                //    classification.Contains(OVRSceneManager.Classification.WallFace) ||
+                //    classification.Contains(OVRSceneManager.Classification.WindowFrame))
+                //{
+                //    Destroy(sceneAnchor.gameObject);
+                //}
+                //else
+                if (classification.Contains(OVRSceneManager.Classification.Floor))
                 {
                     floorAnchor = sceneAnchor;
 
@@ -75,7 +76,6 @@ public class PassthroughRoom : MonoBehaviour
                             }
                         }
                     }
-                    //Destroy(sceneAnchor.gameObject);
                 }
             }
         }
