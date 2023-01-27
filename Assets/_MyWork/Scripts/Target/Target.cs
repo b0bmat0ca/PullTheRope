@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public abstract class Target : MonoBehaviour
 {
-    [Header("Optional"), SerializeField] protected CollisionEventSubject subject;
+    [SerializeField] protected CollisionEventSubject subject;
     [SerializeField] protected TargetData targetData;
     [SerializeField] protected Collider colider;
     public Collider TargetColider { get { return colider; } }

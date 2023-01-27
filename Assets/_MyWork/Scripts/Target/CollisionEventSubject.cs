@@ -21,6 +21,10 @@ public class CollisionEventSubject : MonoBehaviour
         
     }
 
+    /// <summary>
+    /// 弾丸と衝突した際にオブザーバーに通知する
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Bullet"))

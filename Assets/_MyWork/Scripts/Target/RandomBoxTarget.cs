@@ -22,6 +22,7 @@ public class RandomBoxTarget : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // 弾丸と衝突したかを購読
         subject.OnCollisionEnterAsync
             .Subscribe(_ =>
             {

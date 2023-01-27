@@ -38,6 +38,7 @@ public class EnableDestroyTarget : Target
     {
         base.Start();
 
+        // 弾丸と衝突したかを購読
         subject.OnCollisionEnterAsync
             .Subscribe(_ =>
             {
