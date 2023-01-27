@@ -38,6 +38,7 @@ public class EnableDestroyTarget : Target
     {
         base.Start();
 
+        // 弾丸と衝突したかを購読
         subject.OnCollisionEnterAsync
             .Subscribe(_ =>
             {
@@ -49,13 +50,5 @@ public class EnableDestroyTarget : Target
     void Update()
     {
         
-    }
-
-    private  void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Bullet"))
-        {
-            DestroyTarget().Forget();
-        }
     }
 }

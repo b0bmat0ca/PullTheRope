@@ -77,3 +77,4 @@ crashlytics-build.properties
 /[Aa]ssets/_ExternalAsset
 /[Aa]ssets/Oculus
 /[Aa]ssets/TextMesh*
+/[Aa]ssets/Editor
