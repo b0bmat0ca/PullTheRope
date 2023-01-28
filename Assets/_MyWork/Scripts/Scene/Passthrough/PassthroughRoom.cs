@@ -11,6 +11,10 @@ public class PassthroughRoom : MonoBehaviour
     [SerializeField] private Transform envRoot;
     [SerializeField] private const float groundDelta = 0.02f;
 
+    [SerializeField] private GameObject player;
+    [SerializeField] private GameObject cannon;
+    [SerializeField] private GameObject cannonBase;
+
     private List<Vector3> cornerPoints = new List<Vector3>();
 
     private void Awake()
@@ -79,12 +83,19 @@ public class PassthroughRoom : MonoBehaviour
                 else if (classification.Contains(OVRSceneManager.Classification.Desk) ||
                          classification.Contains(OVRSceneManager.Classification.Other))
                 {
-                    sceneAnchor.gameObject.SetActive(false);
+                    //sceneAnchor.gameObject.SetActive(false);
                 }
             }
         }
-
         CullForegroundObjects();
+
+        // 砲台の位置調整
+        Vector3 cannonPosition = new(player.transform.position.x, cannon.transform.position.y, (player.transform.position.z + 0.5f));
+        Vector3 cannonBasePosition = new(player.transform.position.x, cannonBase.transform.position.y, (player.transform.position.z + 0.5f));
+        cannon.transform.SetPositionAndRotation(cannonPosition, player.transform.rotation);
+        cannonBase.transform.SetPositionAndRotation(cannonBasePosition, Quaternion.identity);
+        cannon.SetActive(true);
+        cannonBase.SetActive(true);
     }
 
     /// <summary>

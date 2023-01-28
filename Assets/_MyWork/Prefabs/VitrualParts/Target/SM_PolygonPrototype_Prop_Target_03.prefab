@@ -2123,7 +2123,9 @@ MonoBehaviour:
   colider: {fileID: 654487305770159179}
   destroyTime: 5
   particleList: []
-  seList: []
+  seList:
+  - seName: BulletHit
+    se: {fileID: 8300000, guid: 221683c53355204488e8fd36b525d886, type: 3}
   rayFireRigid: {fileID: 6920096486019086241}
 --- !u!1 &6920096485942225146
 GameObject:

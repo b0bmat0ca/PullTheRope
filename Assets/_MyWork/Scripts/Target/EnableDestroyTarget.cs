@@ -42,6 +42,7 @@ public class EnableDestroyTarget : Target
         subject.OnCollisionEnterAsync
             .Subscribe(_ =>
             {
+                audioSource.PlayOneShot(GetSE("BulletHit"));
                 DestroyTarget().Forget();
             }).AddTo(this);
     }

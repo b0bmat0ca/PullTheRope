@@ -1,36 +1,51 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using RayFire;
 using UniRx;
+using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(AudioSource))]
-public class RandomBoxTarget : MonoBehaviour
+public class RandomBoxTarget : Target
 {
-    [SerializeField] private CollisionEventSubject subject;
     [SerializeField] private GameObject boxPattern;
     [SerializeField] private Transform itemSpaawnPoint;
     [SerializeField] private GameObject[] items;
 
-    private AudioSource audioSource;
+    private bool onDestroy = false;
 
-    private void Awake()
+    #region Target
+    protected override async UniTaskVoid DestroyTarget()
     {
-        audioSource = GetComponent<AudioSource>();
+        onDestroy = true;
+        await UniTask.Delay(TimeSpan.FromSeconds(destroyTime), cancellationToken: token);
+
+        Destroy(gameObject);
+    }
+    #endregion
+
+    protected override void Awake()
+    {
+        base.Awake();
     }
 
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
+        token = tokenSource.Token;
+
         // 弾丸と衝突したかを購読
         subject.OnCollisionEnterAsync
             .Subscribe(_ =>
             {
-                boxPattern.SetActive(false);
-                GameObject obj = Instantiate(items[Random.Range(0, items.Length -1)], itemSpaawnPoint.position, Quaternion.identity);
-                obj.SetActive(false);
-                obj.transform.localScale = transform.localScale;
-                obj.SetActive(true);
+                audioSource.PlayOneShot(GetSE("BulletHit"));
+                if (!onDestroy)
+                {
+                    InstantiateRandomObject();
+                }
             }).AddTo(this);
     }
 
@@ -38,5 +53,17 @@ public class RandomBoxTarget : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void InstantiateRandomObject()
+    {
+        boxPattern.SetActive(false);
+        GameObject obj = Instantiate(items[Random.Range(0, items.Length - 1)], itemSpaawnPoint.position, Quaternion.identity);
+        obj.SetActive(false);
+        obj.transform.localScale = transform.localScale;
+        obj.SetActive(true);
+
+        // ランダムボックスの破壊
+        DestroyTarget().Forget();
     }
 }

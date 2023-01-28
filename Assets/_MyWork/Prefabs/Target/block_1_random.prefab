@@ -674,6 +674,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   subject: {fileID: 5354842314259568355}
+  targetData: {fileID: 11400000, guid: ce50b4427f90b464da426c04aa130302, type: 2}
+  colider: {fileID: 7316860655425440835}
+  destroyTime: 20
+  particleList: []
+  seList: []
   boxPattern: {fileID: 7426320746342579022}
   itemSpaawnPoint: {fileID: 7615543130657960193}
   items:

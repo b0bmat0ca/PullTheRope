@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Oculus.Interaction;
 using UniRx;
 using UnityEngine;
 
@@ -11,9 +12,10 @@ public class CannonMultiMove : MonoBehaviour
     [Header("回転するスピードの係数"), SerializeField] private float angularSpeed = 10f;
 
     private IInputEventProvider inputProvider;
-
     private Vector3 turretOffset;   // 砲塔の配置位置によるベクトルのオフセット
     private Vector3 handReferenceVector = Vector3.back; // 回転開始の基準ベクトル
+    private Transform handTransform;
+    private float handOffset;
     private const float HAND_OFFSET = 19;   // 掴む位置による角度の誤差
 
     private void Awake()
@@ -29,12 +31,8 @@ public class CannonMultiMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float handOffset;
-
         if (inputProvider.IsTurretGrab.Value)
         {
-            Transform handTransform;
-
             if (inputProvider.TurretGrabbed == TurretGrabbedHand.Left)
             {
                 handTransform = leftHandAnchor;

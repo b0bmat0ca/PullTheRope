@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3185026045370769188}
   - component: {fileID: 3185026045370769194}
-  - component: {fileID: 3185026045370769189}
   m_Layer: 0
   m_Name: Collider
   m_TagString: Untagged
@@ -54,18 +53,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.0949935, y: 1.0484512, z: 1.0949935}
   m_Center: {x: 0, y: 0.48982847, z: 0}
---- !u!114 &3185026045370769189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3185026045370769195}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d772cd9e773ecc45aec3b1343afd1a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3185544104381503072
 GameObject:
   m_ObjectHideFlags: 0
@@ -327,6 +314,8 @@ GameObject:
   - component: {fileID: 3380842868832138868}
   - component: {fileID: 3185026044780590956}
   - component: {fileID: 3185026044780590957}
+  - component: {fileID: 6622043269101146511}
+  - component: {fileID: 1748449715361079172}
   m_Layer: 0
   m_Name: mushroom_2
   m_TagString: Untagged
@@ -391,7 +380,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -403,7 +392,7 @@ AudioSource:
   MinDistance: 1
   MaxDistance: 500
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 1
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -436,7 +425,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -488,9 +477,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5da514b10f5f0f741916bbb6e6277f1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subject: {fileID: 3185026045370769189}
+  subject: {fileID: 1748449715361079172}
   targetData: {fileID: 11400000, guid: 02bfa784f098b7c42b08a6cc5c2fb1ba, type: 2}
   colider: {fileID: 3185026045370769194}
   destroyTime: 5
   particleList: []
-  seList: []
+  seList:
+  - seName: Instantiate
+    se: {fileID: 8300000, guid: 76018432deecb084e85e7ac111391748, type: 3}
+  - seName: BulletHit
+    se: {fileID: 8300000, guid: ba3ffe3597e7f7446aebb4e769a2c786, type: 3}
+--- !u!54 &6622043269101146511
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3186157548710712310}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
+--- !u!114 &1748449715361079172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3186157548710712310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d772cd9e773ecc45aec3b1343afd1a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
