@@ -79,7 +79,7 @@ public class PassthroughRoom : MonoBehaviour
                 else if (classification.Contains(OVRSceneManager.Classification.Desk) ||
                          classification.Contains(OVRSceneManager.Classification.Other))
                 {
-                    //sceneAnchor.gameObject.SetActive(false);
+                    sceneAnchor.gameObject.SetActive(false);
                 }
             }
         }
