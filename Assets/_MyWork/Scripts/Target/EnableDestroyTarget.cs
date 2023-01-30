@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using RayFire;
 using UniRx;
+using UniRx.Triggers;
 using Cysharp.Threading.Tasks;
 using System;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
+using Unity.VisualScripting;
 
 
 public class EnableDestroyTarget : Target
@@ -39,12 +41,29 @@ public class EnableDestroyTarget : Target
         base.Start();
 
         // 弾丸と衝突したかを購読
-        subject.OnCollisionEnterAsync
-            .Subscribe(_ =>
-            {
-                audioSource.PlayOneShot(GetSE("BulletHit"));
-                DestroyTarget().Forget();
-            }).AddTo(this);
+        if (enableRigidBody)
+        {
+            this.OnCollisionEnterAsObservable()
+                .Where(collision => collision.gameObject.CompareTag("Bullet"))
+                .Subscribe(collision =>
+                {
+                    audioSource.PlayOneShot(GetSE("BulletHit"));
+                    DestroyTarget().Forget();
+
+                }).AddTo(this);
+        }
+        else
+        {
+            colider.OnCollisionEnterAsObservable()
+                .Where(collision => collision.gameObject.CompareTag("Bullet"))
+                .Subscribe(collision =>
+                {
+                    audioSource.PlayOneShot(GetSE("BulletHit"));
+                    DestroyTarget().Forget();
+
+                }).AddTo(this);
+        }
+        
     }
 
     // Update is called once per frame

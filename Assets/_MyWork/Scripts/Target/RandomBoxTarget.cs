@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using RayFire;
 using UniRx;
+using UniRx.Triggers;
 using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -38,14 +39,16 @@ public class RandomBoxTarget : Target
         token = tokenSource.Token;
 
         // 弾丸と衝突したかを購読
-        subject.OnCollisionEnterAsync
-            .Subscribe(_ =>
+        colider.OnCollisionEnterAsObservable()
+            .Where(collision => collision.gameObject.CompareTag("Bullet"))
+            .Subscribe(collision =>
             {
                 audioSource.PlayOneShot(GetSE("BulletHit"));
                 if (!onDestroy)
                 {
                     InstantiateRandomObject();
                 }
+
             }).AddTo(this);
     }
 

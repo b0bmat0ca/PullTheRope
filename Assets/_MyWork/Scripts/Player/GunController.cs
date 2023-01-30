@@ -7,12 +7,6 @@ using System;
 
 public class GunController : MonoBehaviour
 {
-    public IObservable<bool> OnFirstTurretGrabAsync => onFirstTurretGrabAsyncSubject;
-    private readonly AsyncSubject<bool> onFirstTurretGrabAsyncSubject = new();
-
-    public IObservable<bool> OnFirstTriggerGrabAsync => onFirstTriggerGrabAsyncSubject;
-    private readonly AsyncSubject<bool> onFirstTriggerGrabAsyncSubject = new();
-
     [Header("紐"), SerializeField] private ObiRope rope;
     [Header("発射口の位置"), SerializeField] private Transform muzzle;
     [Header("弾倉"), SerializeField] private MagazineCartridgeController magazineCartridge;
@@ -43,24 +37,6 @@ public class GunController : MonoBehaviour
     void Start()
     {
         inputProvider= GetComponent<IInputEventProvider>();
-
-        // 砲塔を掴んだかを購読(初回のみ)
-        inputProvider.IsTurretGrab
-            .Where(x => x)
-            .Subscribe(_ =>
-            {
-                onFirstTurretGrabAsyncSubject.OnNext(true);
-                onFirstTurretGrabAsyncSubject.OnCompleted();
-            }).AddTo(this);
-
-        // トリガーを掴んだかを購読(初回のみ)
-        inputProvider.IsTriggerGrab
-            .Where(x => x)
-            .Subscribe(_ =>
-            {
-                onFirstTriggerGrabAsyncSubject.OnNext(true);
-                onFirstTriggerGrabAsyncSubject.OnCompleted();
-            }).AddTo(this);
 
         defaultRopeLength = rope.CalculateLength(); // 0.3
         ropeLength.Value = defaultRopeLength;

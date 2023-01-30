@@ -11,4 +11,7 @@ public class TargetData : ScriptableObject
 
     public int Point => point;    // 点数
     [SerializeField] private int point;
+
+    public bool EnableRigidBody => enableRigidBody; // RigidBodyが付与されたターゲットか
+    [SerializeField] private bool enableRigidBody;
 }

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Oculus.Interaction.HandGrab;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Experimental.XR.Interaction;
 
 public class PassthroughRoom : MonoBehaviour
 {
@@ -12,7 +14,16 @@ public class PassthroughRoom : MonoBehaviour
     [SerializeField] private const float groundDelta = 0.02f;
 
     [SerializeField] private GameObject player;
+    [SerializeField] private Transform leftHand;
+    [SerializeField] private Transform rightHand;
+    [SerializeField] private HandGrabInteractor leftHandGrab;
+    [SerializeField] private HandGrabInteractor rightHandGrab;
+
+    [Header("砲台の親オブジェクト"),SerializeField] private Transform cannonParent;
+    [SerializeField] private GameObject cannonPrefab;
     [SerializeField] private GameObject cannon;
+    private float cannonYOffset = 1.342f;
+    [Header("砲台の初期生成位置、プレイヤーとのオフセット値"), SerializeField] private float cannonZOffset = 0.25f;
     [SerializeField] private GameObject cannonBase;
 
     private List<Vector3> cornerPoints = new List<Vector3>();
@@ -90,12 +101,39 @@ public class PassthroughRoom : MonoBehaviour
         CullForegroundObjects();
 
         // 砲台の位置調整
-        Vector3 cannonPosition = new(player.transform.position.x, cannon.transform.position.y, (player.transform.position.z + 0.5f));
-        Vector3 cannonBasePosition = new(player.transform.position.x, cannonBase.transform.position.y, (player.transform.position.z + 0.5f));
-        cannon.transform.SetPositionAndRotation(cannonPosition, player.transform.rotation);
+        InitializeCannon();
+        
+    }
+
+    private void InitializeCannon()
+    {
+        Vector3 cannonPosition = new(player.transform.position.x, cannonYOffset, (player.transform.position.z + cannonZOffset));
+        Vector3 cannonRotation = new(0, player.transform.rotation.y, 0);
+        Vector3 cannonBasePosition = new(player.transform.position.x, cannonBase.transform.position.y, (player.transform.position.z + cannonZOffset));
         cannonBase.transform.SetPositionAndRotation(cannonBasePosition, Quaternion.identity);
-        cannon.SetActive(true);
         cannonBase.SetActive(true);
+        CannonReset(cannonPosition, Quaternion.Euler(cannonRotation));
+        cannon.SetActive(true);
+    }
+
+    private GameObject CannonInstantiate(Vector3 position, Quaternion rotation)
+    {
+        cannon = Instantiate(cannonPrefab, position, rotation, cannonParent);
+        cannon.SetActive(false);
+        InputEventProviderGrabbable inputEventProvider = cannon.GetComponent<InputEventProviderGrabbable>();
+        CannonMultiMove cannonMultiMove = cannon.GetComponent<CannonMultiMove>();
+        inputEventProvider.leftHandInteractor = leftHandGrab;
+        inputEventProvider.rightHandInteractor = rightHandGrab;
+        cannonMultiMove.leftHandAnchor = leftHand;
+        cannonMultiMove.rightHandAnchor = rightHand;
+
+        return cannon;
+    }
+
+    public void CannonReset(Vector3 position, Quaternion rotation)
+    {
+        Destroy(cannon);
+        CannonInstantiate(position, rotation);
     }
 
     /// <summary>

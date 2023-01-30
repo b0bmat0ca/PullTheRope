@@ -5,6 +5,7 @@ using Oculus.Interaction;
 using UniRx;
 using Oculus.Interaction.HandGrab;
 using Oculus.Interaction.Input;
+using UnityEngine.Experimental.XR.Interaction;
 
 public class InputEventProviderGrabbable : MonoBehaviour, IInputEventProvider
 {
@@ -31,14 +32,14 @@ public class InputEventProviderGrabbable : MonoBehaviour, IInputEventProvider
     public IReadOnlyReactiveProperty<bool> IsTriggerGrab => isTriggerGrab;
     #endregion
 
+    public HandGrabInteractor leftHandInteractor;
+    public HandGrabInteractor rightHandInteractor;
+
     [Header("砲塔"), SerializeField] private Grabbable turret;
     private ReactiveProperty<bool> isTurretGrab = new(false);
 
     [Header("トリガー"), SerializeField] private Grabbable trigger;
     private ReactiveProperty<bool> isTriggerGrab = new(false);
-
-    [SerializeField] private HandGrabInteractor leftHandInteractor;
-    [SerializeField] private HandGrabInteractor rightHandInteractor;
 
     // Start is called before the first frame update
     void Start()
@@ -50,7 +51,27 @@ public class InputEventProviderGrabbable : MonoBehaviour, IInputEventProvider
     // Update is called once per frame
     void Update()
     {
-        isTurretGrab.Value = turret.GrabPoints.Count > 0;
-        isTriggerGrab.Value = trigger.GrabPoints.Count > 0;
+        //isTurretGrab.Value = turret.GrabPoints.Count > 0;
+        //isTriggerGrab.Value = trigger.GrabPoints.Count > 0;
+    }
+
+    public void TurretGrab()
+    {
+        isTurretGrab.Value = true;
+    }
+
+    public void TurretRelease()
+    {
+        isTurretGrab.Value = false;
+    }
+
+    public void TriggerGrab()
+    {
+        isTriggerGrab.Value = true;
+    }
+
+    public void TriggerRelease()
+    {
+        isTriggerGrab.Value = false;
     }
 }

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UniRx.Triggers;
+using UniRx;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class Target : MonoBehaviour
 {
-    [SerializeField] protected CollisionEventSubject subject;
     [SerializeField] protected TargetData targetData;
     [SerializeField] protected Collider colider;
     public Collider TargetColider { get { return colider; } }
@@ -61,6 +62,7 @@ public abstract class Target : MonoBehaviour
 
     protected string _name;
     protected int point;
+    protected bool enableRigidBody;
 
     protected AudioSource audioSource;
     protected MeshRenderer[] meshRenderers;
@@ -76,6 +78,7 @@ public abstract class Target : MonoBehaviour
     {
         _name = targetData.Name;
         point = targetData.Point;
+        enableRigidBody = targetData.EnableRigidBody;
         audioSource = GetComponent<AudioSource>();
     }
 

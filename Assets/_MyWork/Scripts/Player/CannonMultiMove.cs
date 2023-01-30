@@ -7,8 +7,9 @@ using UnityEngine;
 public class CannonMultiMove : MonoBehaviour
 {
     [SerializeField] private GunController gunController;
-    [Header("左手の位置"),SerializeField] private Transform leftHandAnchor;
-    [Header("右手の位置"), SerializeField] private Transform rightHandAnchor;
+
+    [Header("左手の位置")] public Transform leftHandAnchor;
+    [Header("右手の位置")] public Transform rightHandAnchor;
     [Header("回転するスピードの係数"), SerializeField] private float angularSpeed = 10f;
 
     private IInputEventProvider inputProvider;
@@ -44,11 +45,7 @@ public class CannonMultiMove : MonoBehaviour
                 handOffset = -HAND_OFFSET;
             }
             Vector3 currentHandVector = new Vector3(handTransform.position.x, 0, handTransform.position.z) - turretOffset;
-                
-            Debug.Log("currentHandVector :" +currentHandVector);
-
             float handAngle = Vector3.SignedAngle(handReferenceVector, currentHandVector, Vector3.up);
-            Debug.Log("handAngle" + handAngle);
 
             transform.Rotate(new Vector3(0, (handAngle - handOffset) * (angularSpeed * Time.deltaTime), 0));
             handReferenceVector = -transform.forward;
