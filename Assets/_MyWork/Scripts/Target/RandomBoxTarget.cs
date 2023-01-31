@@ -69,4 +69,9 @@ public class RandomBoxTarget : Target
         // ランダムボックスの破壊
         DestroyTarget().Forget();
     }
+
+    public void DestroyBox()
+    {
+        DestroyTarget().Forget();
+    }
 }

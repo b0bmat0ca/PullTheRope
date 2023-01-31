@@ -78,3 +78,4 @@ crashlytics-build.properties
 /[Aa]ssets/Oculus
 /[Aa]ssets/TextMesh*
 /[Aa]ssets/Editor
+/[Aa]ssets/Plugins/Tiny*

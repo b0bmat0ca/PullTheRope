@@ -1,133 +1,102 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
+using Cysharp.Threading.Tasks;
 using Oculus.Interaction.HandGrab;
-using Unity.VisualScripting;
+using Oculus.Platform.Samples.VrHoops;
+using UniRx;
 using UnityEngine;
-using UnityEngine.Experimental.XR.Interaction;
+using TMPro;
 
-public class PassthroughRoom : MonoBehaviour
+public abstract class PassthroughRoom : MonoBehaviour
 {
-    [SerializeField] private OVRSceneManager sceneManager;
-    [SerializeField] private Transform envRoot;
-    [SerializeField] private const float groundDelta = 0.02f;
+    //public OVRSceneManager sceneManager;
+    public TextMeshProUGUI text;
 
-    [SerializeField] private GameObject player;
-    [SerializeField] private Transform leftHand;
-    [SerializeField] private Transform rightHand;
-    [SerializeField] private HandGrabInteractor leftHandGrab;
-    [SerializeField] private HandGrabInteractor rightHandGrab;
+    public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
+    protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
 
-    [Header("砲台の親オブジェクト"),SerializeField] private Transform cannonParent;
-    [SerializeField] private GameObject cannonPrefab;
-    [SerializeField] private GameObject cannon;
-    private float cannonYOffset = 1.342f;
-    [Header("砲台の初期生成位置、プレイヤーとのオフセット値"), SerializeField] private float cannonZOffset = 0.25f;
-    [SerializeField] private GameObject cannonBase;
+    protected GameObject cannon;
+    [SerializeField] protected  GameObject cannonBase;
 
-    private List<Vector3> cornerPoints = new List<Vector3>();
+    protected Camera mainCamera;
+    protected const float groundDelta = 0.02f;
+    protected const float cannonYOffset = 1.342f;
 
-    private void Awake()
+    protected Transform envRoot;
+    protected OVRHand leftHand;
+    protected OVRHand rightHand;
+    protected HandGrabInteractor leftHandGrab;
+    protected HandGrabInteractor rightHandGrab;
+    protected Transform cannonParent;
+    protected GameObject cannonPrefab;
+    protected float cannonOffset;
+
+    protected  List<Vector3> cornerPoints = new List<Vector3>();
+
+
+    public virtual void Initialize(OVRHand leftHand, OVRHand rightHand
+        , HandGrabInteractor leftHandGrab, HandGrabInteractor rightHandGrab
+        ,Transform cannonParent, GameObject cannonPrefab, float cannonOffset)
     {
-#if UNITY_EDITOR || UNITY_ANDROID
-        OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
-#endif
+        this.leftHand= leftHand;
+        this.rightHand= rightHand;
+        this.leftHandGrab= leftHandGrab;
+        this.rightHandGrab= rightHandGrab;
+        this.cannonParent= cannonParent;
+        this.cannonPrefab= cannonPrefab;
+        this.cannonOffset= cannonOffset;
 
-        sceneManager.SceneModelLoadedSuccessfully += InitializRoom;
+        cannon = cannonParent.GetComponentInChildren<CannonMultiMove>().gameObject;
+        cannon.SetActive(false);
     }
 
-    // Start is called before the first frame update
-    void Start()
+    protected virtual void Awake()
     {
-        
+        onClearAsyncSubject.AddTo(this);
+        mainCamera = Camera.main;
+        envRoot = this.transform;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected void InitializeCannon(bool reset = true)
     {
-
-    }
-
-    private void InitializRoom()
-    {
-        OVRSceneAnchor[] sceneAnchors = FindObjectsOfType<OVRSceneAnchor>();
-        OVRSceneAnchor floorAnchor = null;
-
-        if (sceneAnchors != null)
-        {
-            foreach (OVRSceneAnchor sceneAnchor in sceneAnchors)
-            {
-                OVRSemanticClassification classification = sceneAnchor.GetComponent<OVRSemanticClassification>();
-
-                if (classification.Contains(OVRSceneManager.Classification.Ceiling) ||
-                    classification.Contains(OVRSceneManager.Classification.DoorFrame) ||
-                    classification.Contains(OVRSceneManager.Classification.WallFace) ||
-                    classification.Contains(OVRSceneManager.Classification.WindowFrame))
-                {
-                    sceneAnchor.gameObject.SetActive(false); // Passthrough で現実世界が「見えなくなる」
-                }
-                else if (classification.Contains(OVRSceneManager.Classification.Floor))
-                {
-                    floorAnchor = sceneAnchor;
-
-                    if (envRoot)
-                    {
-                        Vector3 envPos= envRoot.position;
-                        float groundHeight = sceneAnchor.transform.position.y - groundDelta;
-                        envRoot.position = new Vector3(envPos.x, groundHeight, envPos.z);
-
-                        if (OVRPlugin.GetSpaceBoundary2D(sceneAnchor.Space, out Vector2[] boundary))
-                        {
-                            cornerPoints = boundary.ToList()
-                                .ConvertAll<Vector3>(corner => new Vector3(-corner.x, corner.y, 0.0f));
-
-                            cornerPoints.Reverse();
-                            for (int i = 0; i < cornerPoints.Count; i++)
-                            {
-                                cornerPoints[i] = sceneAnchor.transform.TransformPoint(cornerPoints[i]);
-                            }
-                        }
-                    }
-                    sceneAnchor.gameObject.SetActive(false);    // Passthrough で現実世界が「見えなくなる」
-                }
-                else if (classification.Contains(OVRSceneManager.Classification.Desk) ||
-                         classification.Contains(OVRSceneManager.Classification.Other))
-                {
-                    //sceneAnchor.gameObject.SetActive(false);
-                }
-            }
-        }
-        CullForegroundObjects();
-
-        // 砲台の位置調整
-        InitializeCannon();
-        
-    }
-
-    private void InitializeCannon()
-    {
-        Vector3 cannonPosition = new(player.transform.position.x, cannonYOffset, (player.transform.position.z + cannonZOffset));
-        Vector3 cannonRotation = new(0, player.transform.rotation.y, 0);
-        Vector3 cannonBasePosition = new(player.transform.position.x, cannonBase.transform.position.y, (player.transform.position.z + cannonZOffset));
+        Vector3 cannonPosition = CannonPosition(cannonYOffset);
+        Vector3 cannonRotation = new(0, mainCamera.transform.eulerAngles.y, 0);
+        Vector3 cannonBasePosition = new(cannonPosition.x, cannonBase.transform.position.y, cannonPosition.z);
         cannonBase.transform.SetPositionAndRotation(cannonBasePosition, Quaternion.identity);
         cannonBase.SetActive(true);
-        CannonReset(cannonPosition, Quaternion.Euler(cannonRotation));
+        if (reset)
+        {
+            CannonReset(cannonPosition, Quaternion.Euler(cannonRotation));
+        }
+        else
+        {
+            cannon.transform.SetPositionAndRotation(cannonPosition, Quaternion.Euler(cannonRotation));
+        }
+
+        InputEventProviderGrabbable inputEventProvider = cannon.GetComponent<InputEventProviderGrabbable>();
+        CannonMultiMove cannonMultiMove = cannon.GetComponent<CannonMultiMove>();
+        cannonMultiMove.TurretOffset = new(cannonMultiMove.transform.position.x, 0, cannonMultiMove.transform.position.z);
+        inputEventProvider.leftHandInteractor = leftHandGrab;
+        inputEventProvider.rightHandInteractor = rightHandGrab;
+        cannonMultiMove.leftHandAnchor = leftHand.transform;
+        cannonMultiMove.rightHandAnchor = rightHand.transform;
         cannon.SetActive(true);
     }
 
-    private GameObject CannonInstantiate(Vector3 position, Quaternion rotation)
+    protected GameObject CannonInstantiate(Vector3 position, Quaternion rotation)
     {
         cannon = Instantiate(cannonPrefab, position, rotation, cannonParent);
         cannon.SetActive(false);
-        InputEventProviderGrabbable inputEventProvider = cannon.GetComponent<InputEventProviderGrabbable>();
-        CannonMultiMove cannonMultiMove = cannon.GetComponent<CannonMultiMove>();
-        inputEventProvider.leftHandInteractor = leftHandGrab;
-        inputEventProvider.rightHandInteractor = rightHandGrab;
-        cannonMultiMove.leftHandAnchor = leftHand;
-        cannonMultiMove.rightHandAnchor = rightHand;
 
         return cannon;
+    }
+
+    protected Vector3 CannonPosition(float yOffset)
+    {
+        Vector3 playerForward = mainCamera.transform.forward;
+        return new Vector3(mainCamera.transform.position.x, yOffset, mainCamera.transform.position.z)
+            + new Vector3(playerForward.x, 0, playerForward.z) * cannonOffset;
     }
 
     public void CannonReset(Vector3 position, Quaternion rotation)
@@ -139,7 +108,7 @@ public class PassthroughRoom : MonoBehaviour
     /// <summary>
     /// If an object contains the ForegroundObject component and is inside the room, destroy it.
     /// </summary>
-    void CullForegroundObjects()
+    protected void CullForegroundObjects()
     {
         ForegroundObject[] foregroundObjects = envRoot.GetComponentsInChildren<ForegroundObject>();
         foreach (ForegroundObject obj in foregroundObjects)
@@ -199,4 +168,6 @@ public class PassthroughRoom : MonoBehaviour
         }
         return (lineCrosses % 2) == 1;
     }
+
+    public abstract void InitializRoom();
 }

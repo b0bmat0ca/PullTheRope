@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: vfes
-  productName: vfes_xx_PullTheRope
+  productName: vacapresen.Takano
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -153,7 +153,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.vfes.vfes_xx_PullTheRope
+    Android: vfes.PullTheRope
     Standalone: com.UnityTechnologies.com.unity.template-starter-kit
   buildNumber:
     Standalone: 0
@@ -786,7 +786,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: OBI_ONI_SUPPORTED;UNITASK_DOTWEEN_SUPPORT
+    Android: OBI_ONI_SUPPORTED;UNITASK_DOTWEEN_SUPPORT;MODULAR_3D_TEXT
     Standalone: OBI_ONI_SUPPORTED
     iPhone: OBI_ONI_SUPPORTED
   additionalCompilerArguments: {}
