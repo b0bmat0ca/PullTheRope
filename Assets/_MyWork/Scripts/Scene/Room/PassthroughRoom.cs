@@ -11,7 +11,7 @@ using TMPro;
 public abstract class PassthroughRoom : MonoBehaviour
 {
     //public OVRSceneManager sceneManager;
-    public TextMeshProUGUI text;
+    public TextMeshProUGUI text;    // デバッグ用
 
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();

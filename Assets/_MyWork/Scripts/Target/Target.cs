@@ -5,10 +5,14 @@ using Cysharp.Threading.Tasks;
 using UniRx.Triggers;
 using UniRx;
 using UnityEngine;
+using System;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class Target : MonoBehaviour
 {
+    public IObservable<bool> OnDestroyAsync => onDestroyAsyncSubject; // ターゲット破壊通知用
+    protected readonly AsyncSubject<bool> onDestroyAsyncSubject = new();
+
     [SerializeField] protected TargetData targetData;
     [SerializeField] protected Collider colider;
     public Collider TargetColider { get { return colider; } }

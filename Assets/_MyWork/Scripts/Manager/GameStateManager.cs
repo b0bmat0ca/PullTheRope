@@ -48,6 +48,7 @@ public class GameStateManager : MonoBehaviour
     private void Awake()
     {
         gameState.AddTo(this);
+        gameState.Value = GameState.Loading;
 
         fadeSphere.gameObject.SetActive(true);
         fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
@@ -105,7 +106,11 @@ public class GameStateManager : MonoBehaviour
             fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
 
             currentRoom.gameObject.SetActive(false);
-            CommonUtility.Instance.TransitionScene(++CurrentRoomIndex);
+
+            //CommonUtility.Instance.TransitionScene(++CurrentRoomIndex);
+
+            CurrentRoomIndex++;
+            CommonUtility.Instance.TransitionScene();
         }
     }
 

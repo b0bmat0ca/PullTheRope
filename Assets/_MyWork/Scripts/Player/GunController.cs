@@ -14,7 +14,6 @@ public class GunController : MonoBehaviour
     [Header("鉄砲のパワー"), SerializeField] private float gunPower = 20f;
     [Header("発射する紐の長さ"), SerializeField] private float fireRopeLength = 0.4f;
 
-
     private float defaultRopeLength;    // 初期の紐の長さ
     private float resetRopeLength;  // 発射計測を開始する紐の長さ
     private float previousRopeLength;   // 発射計測フラグ用の紐の長さ

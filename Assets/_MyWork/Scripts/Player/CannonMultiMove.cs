@@ -51,9 +51,5 @@ public class CannonMultiMove : MonoBehaviour
             transform.Rotate(new Vector3(0, (handAngle - handOffset) * (angularSpeed * Time.deltaTime), 0));
             handReferenceVector = -transform.forward;
         }
-        else
-        {
-
-        }
     }
 }

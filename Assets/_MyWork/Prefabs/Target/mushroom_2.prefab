@@ -315,7 +315,6 @@ GameObject:
   - component: {fileID: 3185026044780590956}
   - component: {fileID: 3185026044780590957}
   - component: {fileID: 6622043269101146511}
-  - component: {fileID: 1748449715361079172}
   m_Layer: 0
   m_Name: mushroom_2
   m_TagString: Untagged
@@ -477,7 +476,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5da514b10f5f0f741916bbb6e6277f1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  subject: {fileID: 1748449715361079172}
   targetData: {fileID: 11400000, guid: 02bfa784f098b7c42b08a6cc5c2fb1ba, type: 2}
   colider: {fileID: 3185026045370769194}
   destroyTime: 5
@@ -514,15 +512,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &1748449715361079172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3186157548710712310}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d772cd9e773ecc45aec3b1343afd1a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

@@ -31,6 +31,10 @@ public class EnableDestroyTarget : Target
 
         await UniTask.Delay(TimeSpan.FromSeconds(destroyTime), cancellationToken: token);
 
+        // 購読者に破壊を通知
+        onDestroyAsyncSubject.OnNext(true);
+        onDestroyAsyncSubject.OnCompleted();
+
         Destroy(gameObject);
     }
     #endregion
