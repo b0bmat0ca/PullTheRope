@@ -51,8 +51,7 @@ public class InputEventProviderGrabbable : MonoBehaviour, IInputEventProvider
     // Update is called once per frame
     void Update()
     {
-        //isTurretGrab.Value = turret.GrabPoints.Count > 0;
-        //isTriggerGrab.Value = trigger.GrabPoints.Count > 0;
+        
     }
 
     public void TurretGrab()

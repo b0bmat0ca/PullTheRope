@@ -32,6 +32,8 @@ public class GameStateManager : MonoBehaviour
     [Header("砲台の親オブジェクト"), SerializeField] private Transform cannonParent;
     [SerializeField] private GameObject cannonPrefab;
 
+    [SerializeField] private float fadeTime = 3f;
+
     // ルームリスト
     [SerializeField] private List<Room> roomList;
     [System.Serializable]
@@ -44,6 +46,8 @@ public class GameStateManager : MonoBehaviour
         public PassthroughRoom Instance { get { return room; } }
     }
     private PassthroughRoom currentRoom;
+
+    private readonly CompositeDisposable compositeDisposable = new();
 
     private void Awake()
     {
@@ -69,18 +73,10 @@ public class GameStateManager : MonoBehaviour
         currentRoom.Initialize(leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab, 0.25f);
         sceneManager.LoadSceneModel();
         sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
-        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: this.GetCancellationTokenOnDestroy());
-        fadeSphere.gameObject.SetActive(false);
+        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
 
         // 開始状態に設定
         gameState.Value = GameState.Start;
-
-        currentRoom.OnClearAsync
-            .Where(x => x)
-            .Subscribe(_ =>
-            {
-                gameState.Value = GameState.End;
-            }).AddTo(this);
     }
 
     // Update is called once per frame
@@ -89,12 +85,24 @@ public class GameStateManager : MonoBehaviour
 
     }
 
-    private void OnChangeState()
+    private async void OnChangeState()
     {
 
         if (gameState.Value == GameState.Start)
         {
+            compositeDisposable.Clear();
 
+            fadeSphere.gameObject.SetActive(false);
+
+            currentRoom.OnClearAsync
+                .Where(x => x)
+                .Subscribe(_ =>
+                {
+                    gameState.Value = GameState.End;
+                }).AddTo(compositeDisposable);
+
+            // プレイ中に設定
+            gameState.Value = GameState.Playing;
         }
         else if (gameState.Value == GameState.Playing)
         {
@@ -102,16 +110,25 @@ public class GameStateManager : MonoBehaviour
         }
         else if (gameState.Value == GameState.End)
         {
-            fadeSphere.gameObject.SetActive(true);
-            fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
-
-            currentRoom.gameObject.SetActive(false);
-
-            //CommonUtility.Instance.TransitionScene(++CurrentRoomIndex);
-
-            CurrentRoomIndex++;
-            CommonUtility.Instance.TransitionScene();
+            await NextRoom();
         }
     }
 
+    private async UniTask NextRoom()
+    {
+        fadeSphere.gameObject.SetActive(true);
+        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
+        
+        currentRoom.gameObject.SetActive(false);
+
+        // 次の部屋の設定
+        currentRoom = roomList[++CurrentRoomIndex].Instance;
+        currentRoom.gameObject.SetActive(true);
+        currentRoom.Initialize(leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab, 0.25f);
+        currentRoom.InitializRoom();
+        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        // 開始状態に設定
+        gameState.Value = GameState.Start;
+    }
 }

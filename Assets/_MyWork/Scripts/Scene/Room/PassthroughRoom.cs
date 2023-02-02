@@ -32,8 +32,21 @@ public abstract class PassthroughRoom : MonoBehaviour
     protected GameObject cannonPrefab;
     protected float cannonOffset;
 
-    protected  List<Vector3> cornerPoints = new List<Vector3>();
+    protected List<Vector3> cornerPoints = new();
+    protected static List<SceneAnchormap> sceneAnchormap = new();
 
+    [Serializable]
+    protected class SceneAnchormap
+    {
+        public string name;
+        public OVRSceneAnchor anchor;
+
+        public SceneAnchormap(string name, OVRSceneAnchor anchor)
+        {
+            this.name = name;
+            this.anchor = anchor;
+        }
+    }
 
     public virtual void Initialize(OVRHand leftHand, OVRHand rightHand
         , HandGrabInteractor leftHandGrab, HandGrabInteractor rightHandGrab

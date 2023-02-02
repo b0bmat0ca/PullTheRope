@@ -35,13 +35,33 @@ public class TitleRoom : PassthroughRoom
             {
                 OVRSemanticClassification classification = sceneAnchor.GetComponent<OVRSemanticClassification>();
 
-                if (classification.Contains(OVRSceneManager.Classification.Ceiling) ||
-                    classification.Contains(OVRSceneManager.Classification.DoorFrame) ||
-                    classification.Contains(OVRSceneManager.Classification.WallFace) ||
-                    classification.Contains(OVRSceneManager.Classification.WindowFrame))
+                if (classification.Contains(OVRSceneManager.Classification.Ceiling))
                 {
-                    sceneAnchor.gameObject.SetActive(false); // Passthrough で現実世界が「見えなくなる」
-
+                    SetSceneAnchor(OVRSceneManager.Classification.Ceiling, sceneAnchor);
+                }
+                else if (classification.Contains(OVRSceneManager.Classification.DoorFrame))
+                {
+                    SetSceneAnchor(OVRSceneManager.Classification.DoorFrame, sceneAnchor);
+                }
+                else if (classification.Contains(OVRSceneManager.Classification.WallFace))
+                {
+                    SetSceneAnchor(OVRSceneManager.Classification.WallFace, sceneAnchor);
+                }
+                else if (classification.Contains(OVRSceneManager.Classification.WindowFrame))
+                {
+                    SetSceneAnchor(OVRSceneManager.Classification.WindowFrame, sceneAnchor);
+                }
+                else if (classification.Contains(OVRSceneManager.Classification.Desk))
+                {
+                    SetSceneAnchor(OVRSceneManager.Classification.Desk, sceneAnchor, false);
+                }
+                else if (classification.Contains(OVRSceneManager.Classification.Couch))
+                {
+                    SetSceneAnchor(OVRSceneManager.Classification.Couch, sceneAnchor, false);
+                }
+                else if (classification.Contains(OVRSceneManager.Classification.Other))
+                {
+                    SetSceneAnchor(OVRSceneManager.Classification.Other, sceneAnchor, false);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.Floor))
                 {
@@ -65,13 +85,7 @@ public class TitleRoom : PassthroughRoom
                             }
                         }
                     }
-                    sceneAnchor.gameObject.SetActive(false);    // Passthrough で現実世界が「見えなくなる」
-                }
-                else if (classification.Contains(OVRSceneManager.Classification.Desk) ||
-                         classification.Contains(OVRSceneManager.Classification.Other) ||
-                         classification.Contains(OVRSceneManager.Classification.Couch))
-                {
-                    sceneAnchor.gameObject.SetActive(false);
+                    SetSceneAnchor(OVRSceneManager.Classification.Floor, sceneAnchor);
                 }
             }
         }
@@ -80,6 +94,19 @@ public class TitleRoom : PassthroughRoom
         cannonBase.SetActive(false);
     }
     #endregion
+    
+    /// <summary>
+    /// OVRSceneAnchorオブジェクトを保持しておく
+    /// </summary>
+    /// <param name="classificationName"></param>
+    /// <param name="sceneAnchor"></param>
+    /// <param name="activeself"></param>
+    private void SetSceneAnchor(string classificationName, OVRSceneAnchor sceneAnchor, bool activeself = true)
+    {
+        SceneAnchormap map = new(classificationName, sceneAnchor);
+        sceneAnchormap.Add(map);
+        sceneAnchor.gameObject.SetActive(activeself);
+    }
 
     protected override void Awake()
     {
@@ -170,7 +197,20 @@ public class TitleRoom : PassthroughRoom
     private async UniTask DisplayTitleAndCannon()
     {
         randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
-        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: this.GetCancellationTokenOnDestroy());
+        int i = 0;
+
+        foreach (SceneAnchormap map in sceneAnchormap)
+        {
+            if (map.name == OVRSceneManager.Classification.Couch ||
+                map.name == OVRSceneManager.Classification.Desk || 
+                map.name == OVRSceneManager.Classification.Other)
+            {
+                // 現実世界のカウチ、机、その他に設定されたものは、そのまま表示しない
+                continue;
+            }
+            map.anchor.gameObject.SetActive(false); // 現実世界を見えなくする
+            await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: this.GetCancellationTokenOnDestroy());
+        }
 
         Vector3 titleTextPosition = new Vector3(mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z).normalized
             * titleDistance + new Vector3(0, titleText.transform.position.y, 0);
