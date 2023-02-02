@@ -65,7 +65,11 @@ MonoBehaviour:
     targetScale: 0.5
   - target: {fileID: 817430215265657497, guid: d7b23a51c609b9f438bcc2f5b9c814a8, type: 3}
     offsetY: 1
-    targetScale: 0.25
+    targetScale: 0.5
+  - target: {fileID: 8357553123438357900, guid: 833db8dca882c734fbb515fdca4ecc56,
+      type: 3}
+    offsetY: 1
+    targetScale: 0.5
 --- !u!1 &5590538625383954810
 GameObject:
   m_ObjectHideFlags: 0

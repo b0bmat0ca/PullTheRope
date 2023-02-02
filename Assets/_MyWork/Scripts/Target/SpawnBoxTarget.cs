@@ -1,10 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SpawnBoxTarget : MonoBehaviour
 {
+    [SerializeField] private float minSpawnTime = 5;
+    [SerializeField] private float maxSpawnTime = 15;
+
     // ターゲットリスト
     [SerializeField] protected List<TargetMap> targetList;
     [System.Serializable]
@@ -36,6 +41,7 @@ public class SpawnBoxTarget : MonoBehaviour
     {
         while (true)
         {
+            await UniTask.Delay(TimeSpan.FromSeconds(Random.Range(minSpawnTime, maxSpawnTime)), cancellationToken: this.GetCancellationTokenOnDestroy());
             TargetMap target = targetList[Random.Range(0, targetList.Count)];
             GameObject obj = Instantiate(target.Target, transform.position + new Vector3(0, target.OffsetY, 0), Quaternion.identity);
             obj.SetActive(false);

@@ -11,6 +11,9 @@ public class DisableDestroyTarget : Target
     #region Target
     protected override async UniTaskVoid DestroyTarget()
     {
+        // 得点追加
+        GameStateManager.Instance.Point.Value += point;
+
         // コライダーを無効化する
         colider.enabled = false;
 
@@ -20,6 +23,10 @@ public class DisableDestroyTarget : Target
         }
 
         await UniTask.Delay(TimeSpan.FromSeconds(destroyTime), cancellationToken: token);
+
+        // 購読者に破壊を通知
+        onDestroyAsyncSubject.OnNext(true);
+        onDestroyAsyncSubject.OnCompleted();
 
         Destroy(gameObject);
     }

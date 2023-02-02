@@ -44,10 +44,7 @@ public class RandomBoxTarget : Target
             .Subscribe(collision =>
             {
                 audioSource.PlayOneShot(GetSE("BulletHit"));
-                if (!onDestroy)
-                {
-                    InstantiateRandomObject();
-                }
+                InstantiateRandomObject();
 
             }).AddTo(this);
     }
@@ -60,6 +57,11 @@ public class RandomBoxTarget : Target
 
     public void InstantiateRandomObject()
     {
+        if (onDestroy)
+        {
+            return;
+        }
+
         boxPattern.SetActive(false);
         GameObject obj = Instantiate(items[Random.Range(0, items.Length - 1)], itemSpaawnPoint.position, Quaternion.identity);
         obj.SetActive(false);
@@ -67,7 +69,7 @@ public class RandomBoxTarget : Target
         obj.SetActive(true);
 
         // ランダムボックスの破壊
-        DestroyTarget().Forget();
+        DestroyBox();
     }
 
     public void DestroyBox()

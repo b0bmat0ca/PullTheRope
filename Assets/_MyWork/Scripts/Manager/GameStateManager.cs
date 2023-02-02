@@ -15,7 +15,11 @@ using TMPro;
 [RequireComponent(typeof(CommonUtility))]
 public class GameStateManager : MonoBehaviour
 {
-    public static int CurrentRoomIndex { get; private set; } = 0;
+    public static GameStateManager Instance;
+
+    public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
+
+    public ReactiveProperty<int> Point = new(0);    // 現在のポイント
 
     [SerializeField] private OVRSceneManager sceneManager;
 
@@ -51,6 +55,13 @@ public class GameStateManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null)
+        {
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+
         gameState.AddTo(this);
         gameState.Value = GameState.Loading;
 

@@ -17,6 +17,9 @@ public class EnableDestroyTarget : Target
     #region Target
     protected override async UniTaskVoid DestroyTarget()
     {
+        // 得点追加
+        GameStateManager.Instance.Point.Value += point;
+
         // 粉砕する
         rayFireRigid.Demolish();
 
@@ -74,5 +77,10 @@ public class EnableDestroyTarget : Target
     void Update()
     {
         
+    }
+
+    public void PunchTarget()
+    {
+        DestroyTarget().Forget();
     }
 }
