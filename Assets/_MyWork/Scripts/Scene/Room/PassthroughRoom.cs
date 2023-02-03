@@ -10,18 +10,16 @@ using TMPro;
 
 public abstract class PassthroughRoom : MonoBehaviour
 {
-    //public OVRSceneManager sceneManager;
-    public TextMeshProUGUI text;    // デバッグ用
+    //public TextMeshProUGUI text;    // デバッグ用
 
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
 
+    protected Transform player;
     protected GameObject cannon;
     [SerializeField] protected  GameObject cannonBase;
-
-    protected Camera mainCamera;
     protected const float groundDelta = 0.02f;
-    protected const float cannonYOffset = 1.342f;
+    protected const float cannonYOffset = 1.33f;
 
     protected Transform envRoot;
     protected OVRHand leftHand;
@@ -30,7 +28,7 @@ public abstract class PassthroughRoom : MonoBehaviour
     protected HandGrabInteractor rightHandGrab;
     protected Transform cannonParent;
     protected GameObject cannonPrefab;
-    protected float cannonOffset;
+    protected float cannonOffset = 5;
 
     protected List<Vector3> cornerPoints = new();
     protected static List<SceneAnchormap> sceneAnchormap = new();
@@ -48,17 +46,17 @@ public abstract class PassthroughRoom : MonoBehaviour
         }
     }
 
-    public virtual void Initialize(OVRHand leftHand, OVRHand rightHand
+    public virtual void Initialize(Transform player, OVRHand leftHand, OVRHand rightHand
         , HandGrabInteractor leftHandGrab, HandGrabInteractor rightHandGrab
-        ,Transform cannonParent, GameObject cannonPrefab, float cannonOffset)
+        ,Transform cannonParent, GameObject cannonPrefab)
     {
+        this.player= player;
         this.leftHand= leftHand;
         this.rightHand= rightHand;
         this.leftHandGrab= leftHandGrab;
         this.rightHandGrab= rightHandGrab;
         this.cannonParent= cannonParent;
         this.cannonPrefab= cannonPrefab;
-        this.cannonOffset= cannonOffset;
 
         cannon = cannonParent.GetComponentInChildren<CannonMultiMove>().gameObject;
         cannon.SetActive(false);
@@ -67,26 +65,41 @@ public abstract class PassthroughRoom : MonoBehaviour
     protected virtual void Awake()
     {
         onClearAsyncSubject.AddTo(this);
-        mainCamera = Camera.main;
         envRoot = this.transform;
     }
 
+    /// <summary>
+    /// 砲台の初期化
+    /// </summary>
+    /// <param name="reset"></param>
     protected void InitializeCannon(bool reset = true)
     {
         Vector3 cannonPosition = CannonPosition(cannonYOffset);
-        Vector3 cannonRotation = new(0, mainCamera.transform.eulerAngles.y, 0);
+        Vector3 cannonRotation = new(0, player.eulerAngles.y, 0);
         Vector3 cannonBasePosition = new(cannonPosition.x, cannonBase.transform.position.y, cannonPosition.z);
-        cannonBase.transform.SetPositionAndRotation(cannonBasePosition, Quaternion.identity);
+        cannonBase.transform.SetPositionAndRotation(cannonBasePosition, Quaternion.Euler(cannonRotation));
         cannonBase.SetActive(true);
+
         if (reset)
         {
-            CannonReset(cannonPosition, Quaternion.Euler(cannonRotation));
+            ResetCannon(cannonPosition, Quaternion.Euler(cannonRotation));
         }
         else
         {
             cannon.transform.SetPositionAndRotation(cannonPosition, Quaternion.Euler(cannonRotation));
         }
 
+        ConfigureCannon();
+        cannon.SetActive(true);
+    }
+
+    protected Vector3 CannonPosition(float yOffset)
+    {
+        return new Vector3(player.position.x, yOffset, player.position.z) + new Vector3(player.forward.x, 0, player.forward.z).normalized;
+    }
+
+    protected void ConfigureCannon()
+    {
         InputEventProviderGrabbable inputEventProvider = cannon.GetComponent<InputEventProviderGrabbable>();
         CannonMultiMove cannonMultiMove = cannon.GetComponent<CannonMultiMove>();
         cannonMultiMove.TurretOffset = new(cannonMultiMove.transform.position.x, 0, cannonMultiMove.transform.position.z);
@@ -94,7 +107,6 @@ public abstract class PassthroughRoom : MonoBehaviour
         inputEventProvider.rightHandInteractor = rightHandGrab;
         cannonMultiMove.leftHandAnchor = leftHand.transform;
         cannonMultiMove.rightHandAnchor = rightHand.transform;
-        cannon.SetActive(true);
     }
 
     protected GameObject CannonInstantiate(Vector3 position, Quaternion rotation)
@@ -105,18 +117,22 @@ public abstract class PassthroughRoom : MonoBehaviour
         return cannon;
     }
 
-    protected Vector3 CannonPosition(float yOffset)
-    {
-        Vector3 playerForward = mainCamera.transform.forward;
-        return new Vector3(mainCamera.transform.position.x, yOffset, mainCamera.transform.position.z)
-            + new Vector3(playerForward.x, 0, playerForward.z) * cannonOffset;
-    }
-
-    public void CannonReset(Vector3 position, Quaternion rotation)
+    /// <summary>
+    /// 砲台のリセット
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="rotation"></param>
+    protected void ResetCannon(Vector3 position, Quaternion rotation)
     {
         Destroy(cannon);
         CannonInstantiate(position, rotation);
     }
+
+    public void ResetCannon()
+    {
+        ResetCannon(cannon.transform.position, cannon.transform.rotation);
+    }
+
 
     /// <summary>
     /// If an object contains the ForegroundObject component and is inside the room, destroy it.
@@ -182,5 +198,20 @@ public abstract class PassthroughRoom : MonoBehaviour
         return (lineCrosses % 2) == 1;
     }
 
+    /// <summary>
+    /// 部屋の初期化
+    /// </summary>
     public abstract void InitializRoom();
+
+    /// <summary>
+    /// 部屋の開始
+    /// </summary>
+    /// <param name="fadeTime"></param>
+    public abstract UniTask StartRoom(float fadeTime);
+
+    /// <summary>
+    /// 部屋の終了
+    /// </summary>
+    /// <returns></returns>
+    public abstract UniTask EndRoom();
 }

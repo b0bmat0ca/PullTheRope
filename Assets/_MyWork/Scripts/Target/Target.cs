@@ -66,8 +66,11 @@ public abstract class Target : MonoBehaviour
 
     protected string _name;
     protected int point;
+    protected bool enableLookAt;
     protected bool enableRigidBody;
 
+    protected StageModel model;
+    protected Camera mainCamera;
     protected AudioSource audioSource;
     protected MeshRenderer[] meshRenderers;
     protected CancellationTokenSource tokenSource = new();
@@ -82,7 +85,11 @@ public abstract class Target : MonoBehaviour
     {
         _name = targetData.Name;
         point = targetData.Point;
+        enableLookAt = targetData.EnableLookAt;
         enableRigidBody = targetData.EnableRigidBody;
+
+        model = GameStateManager.Instance.model;
+        mainCamera = Camera.main;
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -91,6 +98,15 @@ public abstract class Target : MonoBehaviour
     {
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
         token = tokenSource.Token;
+    }
+
+    // Update is called once per frame
+    protected virtual void Update()
+    {
+        if (enableLookAt)
+        {
+            transform.LookAt(mainCamera.transform);
+        }
     }
 
     protected abstract UniTaskVoid DestroyTarget();

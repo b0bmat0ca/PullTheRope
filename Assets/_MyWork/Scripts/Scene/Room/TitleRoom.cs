@@ -93,8 +93,19 @@ public class TitleRoom : PassthroughRoom
 
         cannonBase.SetActive(false);
     }
+
+    public override async UniTask StartRoom(float fadeTime)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
+    }
+
+    public override async UniTask EndRoom()
+    {
+        targetHand.SetActive(false);
+        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: this.GetCancellationTokenOnDestroy());
+    }
     #endregion
-    
+
     /// <summary>
     /// OVRSceneAnchorオブジェクトを保持しておく
     /// </summary>
@@ -150,13 +161,12 @@ public class TitleRoom : PassthroughRoom
             .Where(x => x)
             .Subscribe(_ =>
             {
-                targetHand.SetActive(false);
                 onClearAsyncSubject.OnNext(true);
                 onClearAsyncSubject.OnCompleted();
             });
 
         Vector3 randomBoxPosition = CannonPosition(randomBox.transform.position.y);
-        Vector3 randomBoxRotation = new(0, mainCamera.transform.eulerAngles.y, 0);
+        Vector3 randomBoxRotation = new(0, player.eulerAngles.y, 0);
 
         randomBox.transform.SetPositionAndRotation(randomBoxPosition, Quaternion.Euler(randomBoxRotation));
         randomBox.SetActive(true);
@@ -179,7 +189,7 @@ public class TitleRoom : PassthroughRoom
     /// </summary>
     public void PunchRandomBox()
     {
-        DisplayTitleAndCannon().Forget();
+        DisablePassthrough().Forget();
     }
 
     /// <summary>
@@ -191,13 +201,12 @@ public class TitleRoom : PassthroughRoom
     }
 
     /// <summary>
-    /// タイトルと砲台を表示
+    /// パススルー表示を終了
     /// </summary>
     /// <returns></returns>
-    private async UniTask DisplayTitleAndCannon()
+    private async UniTask DisablePassthrough()
     {
         randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
-        int i = 0;
 
         foreach (SceneAnchormap map in sceneAnchormap)
         {
@@ -212,10 +221,10 @@ public class TitleRoom : PassthroughRoom
             await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: this.GetCancellationTokenOnDestroy());
         }
 
-        Vector3 titleTextPosition = new Vector3(mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z).normalized
+        Vector3 titleTextPosition = new Vector3(player.forward.x, 0, player.forward.z).normalized
             * titleDistance + new Vector3(0, titleText.transform.position.y, 0);
         titleText.transform.position = titleTextPosition;
-        titleText.transform.LookAt(new Vector3(mainCamera.transform.position.x, titleText.transform.position.y, mainCamera.transform.position.z));
+        titleText.transform.LookAt(new Vector3(player.position.x, titleText.transform.position.y, player.position.z));
 
         InitializeCannon(false);
         titleText.SetActive(true);

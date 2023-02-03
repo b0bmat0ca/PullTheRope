@@ -46,6 +46,7 @@ public class SpawnBoxTarget : MonoBehaviour
             GameObject obj = Instantiate(target.Target, transform.position + new Vector3(0, target.OffsetY, 0), Quaternion.identity);
             obj.SetActive(false);
             obj.transform.localScale *= target.TargetScale;
+            obj.transform.SetParent(gameObject.transform);
             obj.SetActive(true);
             await UniTask.WaitUntil(() => obj == null, cancellationToken: this.GetCancellationTokenOnDestroy());
         }

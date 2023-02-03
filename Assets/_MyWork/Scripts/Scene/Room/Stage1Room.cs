@@ -8,23 +8,24 @@ using Oculus.Interaction.HandGrab;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.XR.Interaction;
+using UniRx;
+using Cysharp.Threading.Tasks.Linq;
+using Cysharp.Threading.Tasks.Triggers;
+using Cysharp.Threading.Tasks.CompilerServices;
 
 public class Stage1Room : PassthroughRoom
 {
-    // Start is called before the first frame update
-    void Start()
-    {
+    [Header("制限時間"), SerializeField] private int time = 60;
+    [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject playInfoUI;
+    [Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
 
-    }
+    private float currentTime = 0;
+    private StageModel model;
 
-    // Update is called once per frame
-    void Update()
-    {
+    private bool roomStart = false;
 
-    }
-
-
-    public override void InitializRoom()
+    #region PassthroughRoom
+    public override void  InitializRoom()
     {
         OVRSceneAnchor floorAnchor = null;
 
@@ -67,5 +68,59 @@ public class Stage1Room : PassthroughRoom
         // 砲台の位置調整
         cannonBase.SetActive(false);
         InitializeCannon();
+    }
+
+    public override async UniTask StartRoom(float fadeTime)
+    {
+        playInfoUI.transform.SetParent(cannon.transform);
+        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
+        roomStart = true;
+    }
+
+    public override async UniTask EndRoom()
+    {
+        playInfoUI.transform.SetParent(cannonBase.transform);
+        cannon.transform.position = new Vector3(0, -10, 0);
+        spawnPoint.SetActive(false);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: this.GetCancellationTokenOnDestroy());
+        cannonBase.SetActive(false);
+    }
+    #endregion
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        model = GameStateManager.Instance.model;
+
+        // 制限時間を設定
+        model.Time.Value = this.time;
+
+        // 制限時間を購読
+        model.Time
+            .Where(x => x == 0)
+            .Subscribe( _=>
+            {
+                onClearAsyncSubject.OnNext(true);
+                onClearAsyncSubject.OnCompleted();
+            }).AddTo(this);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (roomStart)
+        {
+            currentTime += Time.deltaTime;
+            if (currentTime >= 1)
+            {
+                if (model.Time.Value > 0)
+                {
+                    model.Time.Value -= 1;
+                }
+                currentTime -= 1;
+            }
+
+        }
     }
 }

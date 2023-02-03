@@ -18,7 +18,7 @@ public class EnableDestroyTarget : Target
     protected override async UniTaskVoid DestroyTarget()
     {
         // 得点追加
-        GameStateManager.Instance.Point.Value += point;
+        model.Score.Value += point;
 
         // 粉砕する
         rayFireRigid.Demolish();
@@ -70,13 +70,6 @@ public class EnableDestroyTarget : Target
 
                 }).AddTo(this);
         }
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void PunchTarget()

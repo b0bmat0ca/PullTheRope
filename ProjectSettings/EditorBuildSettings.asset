@@ -11,15 +11,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/ProtoType/Cannon.unity
     guid: ad5692f6f53d921489785ed6f2d31cc1
-  - enabled: 0
-    path: Assets/Scenes/ProtoType/MR.unity
-    guid: 495d7999e86290244af7da2b86e925c2
   - enabled: 1
     path: Assets/Scenes/PullTheRope.unity
     guid: 739d7a8aa9a4f4e4f85b2f127a3826c8
-  - enabled: 1
-    path: Assets/Scenes/Stage1.unity
-    guid: c893fe5ed273a82418c18355fdd137ff
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: ca7c1021ce0244d4c91b11a573bd5c55,
       type: 2}

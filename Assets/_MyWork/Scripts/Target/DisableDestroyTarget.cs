@@ -12,7 +12,7 @@ public class DisableDestroyTarget : Target
     protected override async UniTaskVoid DestroyTarget()
     {
         // 得点追加
-        GameStateManager.Instance.Point.Value += point;
+        model.Score.Value += point;
 
         // コライダーを無効化する
         colider.enabled = false;
@@ -62,11 +62,5 @@ public class DisableDestroyTarget : Target
         }
 
         audioSource.PlayOneShot(GetSE("Instantiate"));
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

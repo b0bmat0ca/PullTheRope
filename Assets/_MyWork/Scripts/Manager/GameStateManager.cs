@@ -12,14 +12,14 @@ using Unity.VisualScripting.Antlr3.Runtime;
 using Oculus.Platform.Models;
 using TMPro;
 
+[RequireComponent(typeof(StageModel))]
 [RequireComponent(typeof(CommonUtility))]
 public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance;
+    [Header("制限時間、スコアを管理するモデル")] public StageModel model;
 
     public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
-
-    public ReactiveProperty<int> Point = new(0);    // 現在のポイント
 
     [SerializeField] private OVRSceneManager sceneManager;
 
@@ -28,6 +28,7 @@ public class GameStateManager : MonoBehaviour
 
     public MeshRenderer fadeSphere;
 
+    [SerializeField] private Transform player;
     [SerializeField] private OVRHand leftHand;
     [SerializeField] private OVRHand rightHand;
     [SerializeField] private HandGrabInteractor leftHandGrab;
@@ -36,7 +37,7 @@ public class GameStateManager : MonoBehaviour
     [Header("砲台の親オブジェクト"), SerializeField] private Transform cannonParent;
     [SerializeField] private GameObject cannonPrefab;
 
-    [SerializeField] private float fadeTime = 3f;
+    [SerializeField] private float fadeTime = 2f;
 
     // ルームリスト
     [SerializeField] private List<Room> roomList;
@@ -45,9 +46,12 @@ public class GameStateManager : MonoBehaviour
     {
         [SerializeField] private string roomName;
         [SerializeField] private PassthroughRoom room;
+        [SerializeField] private bool resetRoom;
 
         public string RoomName { get { return roomName; } }
         public PassthroughRoom Instance { get { return room; } }
+
+        public bool ResetRoom { get { return resetRoom; } }
     }
     private PassthroughRoom currentRoom;
 
@@ -81,10 +85,10 @@ public class GameStateManager : MonoBehaviour
         // ルームの開始
         currentRoom = roomList[CurrentRoomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
-        currentRoom.Initialize(leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab, 0.25f);
+        currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         sceneManager.LoadSceneModel();
         sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
-        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
+        await currentRoom.StartRoom(fadeTime);
 
         // 開始状態に設定
         gameState.Value = GameState.Start;
@@ -121,23 +125,27 @@ public class GameStateManager : MonoBehaviour
         }
         else if (gameState.Value == GameState.End)
         {
+            await currentRoom.EndRoom();
             await NextRoom();
         }
     }
 
     private async UniTask NextRoom()
     {
-        fadeSphere.gameObject.SetActive(true);
-        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
-        
-        currentRoom.gameObject.SetActive(false);
+        if (roomList[++CurrentRoomIndex].ResetRoom)
+        {
+            fadeSphere.gameObject.SetActive(true);
+            fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
 
+            currentRoom.gameObject.SetActive(false);
+        }
+        
         // 次の部屋の設定
-        currentRoom = roomList[++CurrentRoomIndex].Instance;
+        currentRoom = roomList[CurrentRoomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
-        currentRoom.Initialize(leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab, 0.25f);
+        currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         currentRoom.InitializRoom();
-        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
+        await currentRoom.StartRoom(fadeTime);
 
         // 開始状態に設定
         gameState.Value = GameState.Start;
