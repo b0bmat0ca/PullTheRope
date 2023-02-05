@@ -15,9 +15,12 @@ public abstract class PassthroughRoom : MonoBehaviour
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
 
+    [Header("砲台の台座"), SerializeField] protected GameObject cannonBase;
+    [Header("弾倉"), SerializeField] protected MagazineCartridgeController magazineCartridge;
+
     protected Transform player;
     protected GameObject cannon;
-    [SerializeField] protected  GameObject cannonBase;
+    
     protected const float groundDelta = 0.02f;
     protected const float cannonYOffset = 1.33f;
 
@@ -100,8 +103,12 @@ public abstract class PassthroughRoom : MonoBehaviour
 
     protected void ConfigureCannon()
     {
+        GunController gunController = cannon.GetComponent<GunController>();
         InputEventProviderGrabbable inputEventProvider = cannon.GetComponent<InputEventProviderGrabbable>();
         CannonMultiMove cannonMultiMove = cannon.GetComponent<CannonMultiMove>();
+
+        gunController.magazineCartridge = magazineCartridge;
+        magazineCartridge.muzzle = gunController.muzzle;
         cannonMultiMove.TurretOffset = new(cannonMultiMove.transform.position.x, 0, cannonMultiMove.transform.position.z);
         inputEventProvider.leftHandInteractor = leftHandGrab;
         inputEventProvider.rightHandInteractor = rightHandGrab;

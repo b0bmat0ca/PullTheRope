@@ -26,7 +26,7 @@ public class GameStateManager : MonoBehaviour
     public IReadOnlyReactiveProperty<GameState> State => gameState;
     private ReactiveProperty<GameState> gameState = new(GameState.Loading); // ゲームの進行状態
 
-    public MeshRenderer fadeSphere;
+    [SerializeField] private MeshRenderer fadeSphere;
 
     [SerializeField] private Transform player;
     [SerializeField] private OVRHand leftHand;
@@ -35,7 +35,7 @@ public class GameStateManager : MonoBehaviour
     [SerializeField] private HandGrabInteractor rightHandGrab;
 
     [Header("砲台の親オブジェクト"), SerializeField] private Transform cannonParent;
-    [SerializeField] private GameObject cannonPrefab;
+    [Header("砲台のプレファブ"), SerializeField] private GameObject cannonPrefab;
 
     [SerializeField] private float fadeTime = 2f;
 

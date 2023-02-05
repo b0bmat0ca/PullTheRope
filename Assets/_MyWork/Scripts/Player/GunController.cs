@@ -8,8 +8,8 @@ using System;
 public class GunController : MonoBehaviour
 {
     [Header("紐"), SerializeField] private ObiRope rope;
-    [Header("発射口の位置"), SerializeField] private Transform muzzle;
-    [Header("弾倉"), SerializeField] private MagazineCartridgeController magazineCartridge;
+    [Header("発射口の位置")] public Transform muzzle;
+    [Header("弾倉")] public MagazineCartridgeController magazineCartridge;
 
     [Header("鉄砲のパワー"), SerializeField] private float gunPower = 20f;
     [Header("発射する紐の長さ"), SerializeField] private float fireRopeLength = 0.4f;

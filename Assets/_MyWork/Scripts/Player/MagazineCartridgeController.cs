@@ -8,7 +8,7 @@ using UnityEngine.Pool;
 
 public class MagazineCartridgeController : MonoBehaviour
 {
-    [Header("弾丸の発射位置"), SerializeField] private Transform muzzle;
+    [Header("弾丸の発射位置")] public Transform muzzle;
 
     [NonSerialized] public ObjectPool<Bullet> bulletPool;
 
