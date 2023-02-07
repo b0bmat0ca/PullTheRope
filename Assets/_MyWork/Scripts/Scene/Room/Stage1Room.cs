@@ -29,18 +29,20 @@ public class Stage1Room : PassthroughRoom
     {
         OVRSceneAnchor floorAnchor = null;
 
-        foreach (SceneAnchormap map in sceneAnchormap)
+        foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
-            OVRSceneAnchor sceneAnchor = map.anchor;
-
-            if (map.name == OVRSceneManager.Classification.Couch ||
-                map.name == OVRSceneManager.Classification.Desk ||
-                map.name == OVRSceneManager.Classification.Other)
+            if (sceneAnchorClassification.classification == OVRSceneManager.Classification.Couch ||
+                sceneAnchorClassification.classification == OVRSceneManager.Classification.Desk ||
+                sceneAnchorClassification.classification == OVRSceneManager.Classification.Other)
             {
-                map.anchor.gameObject.SetActive(true);
+                foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
+                {
+                    sceneAnchor.gameObject.SetActive(true); // 可視化する
+                }
             }
-            else if (map.name == OVRSceneManager.Classification.Floor)
+            else if (sceneAnchorClassification.classification == OVRSceneManager.Classification.Floor)
             {
+                OVRSceneAnchor sceneAnchor = sceneAnchorClassification.anchors[0];
                 floorAnchor = sceneAnchor;
 
                 if (envRoot)
@@ -70,20 +72,24 @@ public class Stage1Room : PassthroughRoom
         InitializeCannon();
     }
 
-    public override async UniTask StartRoom(float fadeTime)
+    public override async UniTask StartRoom()
     {
         playInfoUI.transform.SetParent(cannon.transform);
-        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        await UniTask.WaitUntil(() => cannon.activeSelf, cancellationToken: this.GetCancellationTokenOnDestroy());
+
         roomStart = true;
     }
 
     public override async UniTask EndRoom()
     {
         playInfoUI.transform.SetParent(cannonBase.transform);
+
         cannon.transform.position = new Vector3(0, -10, 0);
         spawnPoint.SetActive(false);
 
         await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: this.GetCancellationTokenOnDestroy());
+
         cannonBase.SetActive(false);
     }
     #endregion

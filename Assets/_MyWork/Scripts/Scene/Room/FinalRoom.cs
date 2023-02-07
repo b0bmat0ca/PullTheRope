@@ -17,10 +17,9 @@ public class FinalRoom : PassthroughRoom
         return;
     }
 
-    public override async UniTask StartRoom(float fadeTime)
+    public override async UniTask StartRoom()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
-        EnablePassthrough().Forget();
+        await EnablePassthrough();
     }
 
     public override async UniTask EndRoom()
@@ -45,15 +44,16 @@ public class FinalRoom : PassthroughRoom
     /// パススルー表示への切り替え
     /// </summary>
     /// <returns></returns>
-    private async UniTaskVoid EnablePassthrough()
+    private async UniTask EnablePassthrough()
     {
-        foreach (SceneAnchormap map in sceneAnchormap)
+        foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
-
-            map.anchor.gameObject.SetActive(!map.anchor.gameObject.activeSelf);
-            await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: this.GetCancellationTokenOnDestroy());
+            text.text += sceneAnchorClassification.classification;
+            foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
+            {
+                sceneAnchor.gameObject.SetActive(!sceneAnchor.gameObject.activeSelf);
+            }
+            await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: this.GetCancellationTokenOnDestroy());
         }
     }
-
-
 }

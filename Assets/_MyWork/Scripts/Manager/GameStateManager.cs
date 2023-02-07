@@ -68,9 +68,6 @@ public class GameStateManager : MonoBehaviour
 
         gameState.AddTo(this);
         gameState.Value = GameState.Loading;
-
-        fadeSphere.gameObject.SetActive(true);
-        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
     }
 
     // Start is called before the first frame update
@@ -79,6 +76,10 @@ public class GameStateManager : MonoBehaviour
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_ANDROID
         OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
 #endif
+
+        fadeSphere.gameObject.SetActive(true);
+        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
+
         // ゲームの進行状態を購読する
         gameState.Subscribe(_ => OnChangeState()).AddTo(this);
 
@@ -86,9 +87,9 @@ public class GameStateManager : MonoBehaviour
         currentRoom = roomList[CurrentRoomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
-        sceneManager.LoadSceneModel();
+        //sceneManager.LoadSceneModel();
         sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
-        await currentRoom.StartRoom(fadeTime);
+        await currentRoom.StartRoom();
 
         // 開始状態に設定
         gameState.Value = GameState.Start;
@@ -145,7 +146,7 @@ public class GameStateManager : MonoBehaviour
         currentRoom.gameObject.SetActive(true);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         currentRoom.InitializRoom();
-        await currentRoom.StartRoom(fadeTime);
+        await currentRoom.StartRoom();
 
         // 開始状態に設定
         gameState.Value = GameState.Start;

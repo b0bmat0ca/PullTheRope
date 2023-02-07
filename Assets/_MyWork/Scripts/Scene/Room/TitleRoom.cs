@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Experimental.XR.Interaction;
 using Cysharp.Threading.Tasks;
 using UniRx;
+using DG.Tweening;
 
 public class TitleRoom : PassthroughRoom
 {
@@ -17,9 +18,11 @@ public class TitleRoom : PassthroughRoom
     [SerializeField] private GameObject titleText;
     [SerializeField] private float titleDistance = 10f;
     [SerializeField] private EnableDestroyTarget target;
-    [SerializeField] private GameObject targetHand;
+    [SerializeField] private GameObject guideDialog;
     [SerializeField] private InputEventProviderGrabbable inputEventProvider;
 
+    private bool leftPinch = false;
+    private bool rightPinch = false;
     private bool triggerGrabbed = false;
     private bool turretGrabbed = false;
 
@@ -37,31 +40,31 @@ public class TitleRoom : PassthroughRoom
 
                 if (classification.Contains(OVRSceneManager.Classification.Ceiling))
                 {
-                    SetSceneAnchor(OVRSceneManager.Classification.Ceiling, sceneAnchor);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.Ceiling, sceneAnchor);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.DoorFrame))
                 {
-                    SetSceneAnchor(OVRSceneManager.Classification.DoorFrame, sceneAnchor);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame, sceneAnchor);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.WallFace))
                 {
-                    SetSceneAnchor(OVRSceneManager.Classification.WallFace, sceneAnchor);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.WallFace, sceneAnchor);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.WindowFrame))
                 {
-                    SetSceneAnchor(OVRSceneManager.Classification.WindowFrame, sceneAnchor);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.WindowFrame, sceneAnchor);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.Desk))
                 {
-                    SetSceneAnchor(OVRSceneManager.Classification.Desk, sceneAnchor, false);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.Desk, sceneAnchor, false);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.Couch))
                 {
-                    SetSceneAnchor(OVRSceneManager.Classification.Couch, sceneAnchor, false);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.Couch, sceneAnchor, false);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.Other))
                 {
-                    SetSceneAnchor(OVRSceneManager.Classification.Other, sceneAnchor, false);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.Other, sceneAnchor, false);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.Floor))
                 {
@@ -85,7 +88,7 @@ public class TitleRoom : PassthroughRoom
                             }
                         }
                     }
-                    SetSceneAnchor(OVRSceneManager.Classification.Floor, sceneAnchor);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.Floor, sceneAnchor);
                 }
             }
         }
@@ -94,36 +97,53 @@ public class TitleRoom : PassthroughRoom
         cannonBase.SetActive(false);
     }
 
-    public override async UniTask StartRoom(float fadeTime)
+    public override async UniTask StartRoom()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(fadeTime), cancellationToken: this.GetCancellationTokenOnDestroy());
+        // Center Eye Anchorが準備できるのを待つ
+        await UniTask.WaitUntil(() => player.position != Vector3.zero, cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        guideDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.5f, 1f),
+            Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
+
+        guideDialog.SetActive(true);
+
+        // ガイドダイアログが準備できたタイミング
+        await UniTask.WaitUntil(() => guideDialog.activeSelf, cancellationToken: this.GetCancellationTokenOnDestroy());
     }
 
     public override async UniTask EndRoom()
     {
-        targetHand.SetActive(false);
-        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: this.GetCancellationTokenOnDestroy());
+        // ターゲットオブジェクトが削除されたタイミング
+        await UniTask.WaitUntil(() => target == null, cancellationToken: this.GetCancellationTokenOnDestroy());
     }
     #endregion
 
     /// <summary>
-    /// OVRSceneAnchorオブジェクトを保持しておく
+    /// OVRSceneAnchorオブジェクトを保持し、初期表示設定を行う
     /// </summary>
     /// <param name="classificationName"></param>
     /// <param name="sceneAnchor"></param>
     /// <param name="activeself"></param>
-    private void SetSceneAnchor(string classificationName, OVRSceneAnchor sceneAnchor, bool activeself = true)
+    private void SetSceneAnchorClassification(string classificationName, OVRSceneAnchor sceneAnchor, bool activeself = true)
     {
-        SceneAnchormap map = new(classificationName, sceneAnchor);
-        sceneAnchormap.Add(map);
-        sceneAnchor.gameObject.SetActive(activeself);
+        SceneAnchorClassification sceneAnchorClassification;
+
+        sceneAnchorClassification = GetSceneAnchorClassification(classificationName);
+        if (sceneAnchorClassification == null)
+        {
+            sceneAnchorClassification = new(classificationName, new());
+            sceneAnchorClassifications.Add(sceneAnchorClassification);
+        }
+        sceneAnchorClassification.anchors.Add(sceneAnchor);
+        
+        sceneAnchor.gameObject.SetActive(activeself);   // 初期表示設定
     }
 
     protected override void Awake()
     {
         base.Awake();
+        guideDialog.SetActive(false);
         randomBox.SetActive(false);
-        targetHand.SetActive(false);
         titleText.SetActive(false);
 
         // 初めてトリガーを握ったイベントを取得
@@ -135,7 +155,7 @@ public class TitleRoom : PassthroughRoom
                 triggerGrabbed = true;
                 if (turretGrabbed)
                 {
-                    DisplayTargetHand();
+                    MoveTarget();
                 }
             }).AddTo(this);
 
@@ -148,7 +168,7 @@ public class TitleRoom : PassthroughRoom
                 turretGrabbed = true;
                 if (triggerGrabbed)
                 {
-                    DisplayTargetHand();
+                    MoveTarget();
                 }
             }).AddTo(this);
     }
@@ -156,6 +176,29 @@ public class TitleRoom : PassthroughRoom
     // Start is called before the first frame update
     void Start()
     {
+        CheckPinch checkPinch = guideDialog.GetComponent<CheckPinch>();
+
+        checkPinch.OnLeftCheckAsync
+            .Subscribe(_ =>
+            {
+                leftPinch = true;
+                if (rightPinch)
+                {
+                    EnableRandomBox(GetPlayerForwardPosition(0.5f, 1.6f), Quaternion.identity).Forget();
+                }
+            }).AddTo(this);
+
+        checkPinch.OnRightCheckAsync
+            .Subscribe(_ =>
+            {
+                rightPinch = true;
+                if (leftPinch)
+                {
+                    EnableRandomBox(GetPlayerForwardPosition(0.5f, 1.6f), Quaternion.identity).Forget();
+                }
+            }).AddTo(this);
+
+
         // ターゲットが破壊されたかを購読
         target.OnDestroyAsync
             .Where(x => x)
@@ -164,12 +207,6 @@ public class TitleRoom : PassthroughRoom
                 onClearAsyncSubject.OnNext(true);
                 onClearAsyncSubject.OnCompleted();
             });
-
-        Vector3 randomBoxPosition = CannonPosition(randomBox.transform.position.y);
-        Vector3 randomBoxRotation = new(0, player.eulerAngles.y, 0);
-
-        randomBox.transform.SetPositionAndRotation(randomBoxPosition, Quaternion.Euler(randomBoxRotation));
-        randomBox.SetActive(true);
     }
 
     // Update is called once per frame
@@ -184,6 +221,16 @@ public class TitleRoom : PassthroughRoom
 #endif
     }
 
+    private async UniTaskVoid EnableRandomBox(Vector3 position, Quaternion rotation)
+    {
+        guideDialog.SetActive(false);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        randomBox.transform.SetPositionAndRotation(position, rotation);
+        randomBox.SetActive(true);
+    }
+
     /// <summary>
     /// ランダムボックスをパンチした際の処理
     /// </summary>
@@ -193,11 +240,11 @@ public class TitleRoom : PassthroughRoom
     }
 
     /// <summary>
-    /// ターゲットのガイドハンドを表示
+    /// ターゲットを砲台の近くに移動
     /// </summary>
-    private void DisplayTargetHand()
+    private void MoveTarget()
     {
-        targetHand.SetActive(true);
+        target.transform.DOMove(cannon.transform.position + cannon.transform.forward, 2f).SetEase(Ease.InOutSine);
     }
 
     /// <summary>
@@ -208,25 +255,31 @@ public class TitleRoom : PassthroughRoom
     {
         randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
 
-        foreach (SceneAnchormap map in sceneAnchormap)
+        foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
-            if (map.name == OVRSceneManager.Classification.Couch ||
-                map.name == OVRSceneManager.Classification.Desk || 
-                map.name == OVRSceneManager.Classification.Other)
+            if (sceneAnchorClassification.classification == OVRSceneManager.Classification.Couch ||
+                sceneAnchorClassification.classification == OVRSceneManager.Classification.Desk ||
+                sceneAnchorClassification.classification == OVRSceneManager.Classification.Other)
             {
                 // 現実世界のカウチ、机、その他に設定されたものは、そのまま表示しない
                 continue;
             }
-            map.anchor.gameObject.SetActive(false); // 現実世界を見えなくする
-            await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: this.GetCancellationTokenOnDestroy());
+
+            foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
+            {
+                sceneAnchor.gameObject.SetActive(false);    // 現実世界を見えなくする
+            }
+            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
         }
 
         Vector3 titleTextPosition = new Vector3(player.forward.x, 0, player.forward.z).normalized
             * titleDistance + new Vector3(0, titleText.transform.position.y, 0);
         titleText.transform.position = titleTextPosition;
         titleText.transform.LookAt(new Vector3(player.position.x, titleText.transform.position.y, player.position.z));
+        titleText.SetActive(true);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
 
         InitializeCannon(false);
-        titleText.SetActive(true);
     }
 }

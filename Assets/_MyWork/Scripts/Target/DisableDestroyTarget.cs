@@ -42,7 +42,7 @@ public class DisableDestroyTarget : Target
         {
             this.OnCollisionEnterAsObservable()
                 .Where(collision => collision.gameObject.CompareTag("Bullet"))
-                .Subscribe(collision =>
+                .Subscribe(_ =>
                 {
                     audioSource.PlayOneShot(GetSE("BulletHit"));
                     DestroyTarget().Forget();
@@ -53,7 +53,7 @@ public class DisableDestroyTarget : Target
         {
             colider.OnCollisionEnterAsObservable()
                 .Where(collision => collision.gameObject.CompareTag("Bullet"))
-                .Subscribe(collision =>
+                .Subscribe(_ =>
                 {
                     audioSource.PlayOneShot(GetSE("BulletHit"));
                     DestroyTarget().Forget();

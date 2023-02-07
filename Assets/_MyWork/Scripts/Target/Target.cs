@@ -87,15 +87,14 @@ public abstract class Target : MonoBehaviour
         point = targetData.Point;
         enableLookAt = targetData.EnableLookAt;
         enableRigidBody = targetData.EnableRigidBody;
-
-        model = GameStateManager.Instance.model;
-        mainCamera = Camera.main;
         audioSource = GetComponent<AudioSource>();
     }
 
     // Start is called before the first frame update
     protected virtual void Start()
     {
+        model = GameStateManager.Instance.model;
+        mainCamera = Camera.main;
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
         token = tokenSource.Token;
     }

@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Bullet
   - Gun
+  - LeftFinger
+  - RightFinger
   layers:
   - Default
   - TransparentFX

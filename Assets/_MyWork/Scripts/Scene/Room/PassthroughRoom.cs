@@ -10,7 +10,7 @@ using TMPro;
 
 public abstract class PassthroughRoom : MonoBehaviour
 {
-    //public TextMeshProUGUI text;    // デバッグ用
+    public TextMeshProUGUI text;    // デバッグ用
 
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
@@ -34,19 +34,41 @@ public abstract class PassthroughRoom : MonoBehaviour
     protected float cannonOffset = 5;
 
     protected List<Vector3> cornerPoints = new();
-    protected static List<SceneAnchormap> sceneAnchormap = new();
 
+    
+    protected static List<SceneAnchorClassification> sceneAnchorClassifications = new();
+
+    /// <summary>
+    /// SceneAnchorを保持するクラス
+    /// </summary>
     [Serializable]
-    protected class SceneAnchormap
+    protected class SceneAnchorClassification
     {
-        public string name;
-        public OVRSceneAnchor anchor;
+        public string classification;
+        public List<OVRSceneAnchor> anchors;
 
-        public SceneAnchormap(string name, OVRSceneAnchor anchor)
+        public SceneAnchorClassification(string classification, List<OVRSceneAnchor> anchors)
         {
-            this.name = name;
-            this.anchor = anchor;
+            this.classification = classification;
+            this.anchors = anchors;
         }
+    }
+
+    /// <summary>
+    /// SceneAnchorを種別毎に取得するクラス
+    /// </summary>
+    /// <param name="classification"></param>
+    /// <returns></returns>
+    protected SceneAnchorClassification GetSceneAnchorClassification(string classification)
+    {
+        foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
+        {
+            if (sceneAnchorClassification.classification == classification)
+            {
+                return sceneAnchorClassification;
+            }
+        }
+        return null;
     }
 
     public virtual void Initialize(Transform player, OVRHand leftHand, OVRHand rightHand
@@ -77,7 +99,7 @@ public abstract class PassthroughRoom : MonoBehaviour
     /// <param name="reset"></param>
     protected void InitializeCannon(bool reset = true)
     {
-        Vector3 cannonPosition = CannonPosition(cannonYOffset);
+        Vector3 cannonPosition = GetPlayerForwardPosition(0.5f, cannonYOffset);
         Vector3 cannonRotation = new(0, player.eulerAngles.y, 0);
         Vector3 cannonBasePosition = new(cannonPosition.x, cannonBase.transform.position.y, cannonPosition.z);
         cannonBase.transform.SetPositionAndRotation(cannonBasePosition, Quaternion.Euler(cannonRotation));
@@ -96,9 +118,16 @@ public abstract class PassthroughRoom : MonoBehaviour
         cannon.SetActive(true);
     }
 
-    protected Vector3 CannonPosition(float yOffset)
+    /// <summary>
+    /// プレイヤーの前方座標を取得する
+    /// </summary>
+    /// <param name="forwadOffset"></param>
+    /// <param name="yOffset"></param>
+    /// <returns></returns>
+    protected Vector3 GetPlayerForwardPosition(float forwadOffset ,float yOffset)
     {
-        return new Vector3(player.position.x, yOffset, player.position.z) + new Vector3(player.forward.x, 0, player.forward.z).normalized;
+        return new Vector3(player.position.x, yOffset, player.position.z) +
+            (new Vector3(player.forward.x, 0, player.forward.z).normalized) * forwadOffset;
     }
 
     protected void ConfigureCannon()
@@ -213,8 +242,7 @@ public abstract class PassthroughRoom : MonoBehaviour
     /// <summary>
     /// 部屋の開始
     /// </summary>
-    /// <param name="fadeTime"></param>
-    public abstract UniTask StartRoom(float fadeTime);
+    public abstract UniTask StartRoom();
 
     /// <summary>
     /// 部屋の終了
