@@ -16,7 +16,7 @@ using Cysharp.Threading.Tasks.CompilerServices;
 public class Stage1Room : PassthroughRoom
 {
     [Header("制限時間"), SerializeField] private int time = 60;
-    [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject playInfoUI;
+    [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject scoreDialog;
     [Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
 
     private float currentTime = 0;
@@ -74,7 +74,7 @@ public class Stage1Room : PassthroughRoom
 
     public override async UniTask StartRoom()
     {
-        playInfoUI.transform.SetParent(cannon.transform);
+        scoreDialog.transform.SetParent(cannon.transform);
 
         await UniTask.WaitUntil(() => cannon.activeSelf, cancellationToken: this.GetCancellationTokenOnDestroy());
 
@@ -83,7 +83,7 @@ public class Stage1Room : PassthroughRoom
 
     public override async UniTask EndRoom()
     {
-        playInfoUI.transform.SetParent(cannonBase.transform);
+        scoreDialog.transform.SetParent(cannonBase.transform);
 
         cannon.transform.position = new Vector3(0, -10, 0);
         spawnPoint.SetActive(false);

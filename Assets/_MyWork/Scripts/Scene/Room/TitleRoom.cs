@@ -102,7 +102,7 @@ public class TitleRoom : PassthroughRoom
         // Center Eye Anchorが準備できるのを待つ
         await UniTask.WaitUntil(() => player.position != Vector3.zero, cancellationToken: this.GetCancellationTokenOnDestroy());
 
-        guideDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.5f, 1f),
+        guideDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
             Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
 
         guideDialog.SetActive(true);
@@ -184,7 +184,7 @@ public class TitleRoom : PassthroughRoom
                 leftPinch = true;
                 if (rightPinch)
                 {
-                    EnableRandomBox(GetPlayerForwardPosition(0.5f, 1.6f), Quaternion.identity).Forget();
+                    EnableRandomBox(GetPlayerForwardPosition(0.8f, 1.6f), Quaternion.identity).Forget();
                 }
             }).AddTo(this);
 
@@ -194,7 +194,7 @@ public class TitleRoom : PassthroughRoom
                 rightPinch = true;
                 if (leftPinch)
                 {
-                    EnableRandomBox(GetPlayerForwardPosition(0.5f, 1.6f), Quaternion.identity).Forget();
+                    EnableRandomBox(GetPlayerForwardPosition(0.8f, 1.6f), Quaternion.identity).Forget();
                 }
             }).AddTo(this);
 
