@@ -70,6 +70,10 @@ public class Stage1Room : PassthroughRoom
         // 砲台の位置調整
         cannonBase.SetActive(false);
         InitializeCannon();
+
+        // 初期化完了通知
+        onInitializeAsyncSubject.OnNext(true);
+        onInitializeAsyncSubject.OnCompleted();
     }
 
     public override async UniTask StartRoom()
@@ -81,7 +85,7 @@ public class Stage1Room : PassthroughRoom
         roomStart = true;
     }
 
-    public override async UniTask EndRoom()
+    public override async UniTask<bool> EndRoom()
     {
         scoreDialog.transform.SetParent(cannonBase.transform);
 
@@ -91,6 +95,8 @@ public class Stage1Room : PassthroughRoom
         await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: this.GetCancellationTokenOnDestroy());
 
         cannonBase.SetActive(false);
+
+        return true;
     }
     #endregion
 

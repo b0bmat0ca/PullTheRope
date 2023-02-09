@@ -68,17 +68,16 @@ public class GameStateManager : MonoBehaviour
 
         gameState.AddTo(this);
         gameState.Value = GameState.Loading;
+
+        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
     }
 
     // Start is called before the first frame update
-    async void Start()
+    void Start()
     {
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_ANDROID
         OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
 #endif
-
-        fadeSphere.gameObject.SetActive(true);
-        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
 
         // ゲームの進行状態を購読する
         gameState.Subscribe(_ => OnChangeState()).AddTo(this);
@@ -86,13 +85,16 @@ public class GameStateManager : MonoBehaviour
         // ルームの開始
         currentRoom = roomList[CurrentRoomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
-        currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
-        //sceneManager.LoadSceneModel();
-        sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
-        await currentRoom.StartRoom();
+        currentRoom.OnInitializeAsync
+            .Subscribe(async _ =>
+            {
+                await currentRoom.StartRoom();
 
-        // 開始状態に設定
-        gameState.Value = GameState.Start;
+                // 開始状態に設定
+                gameState.Value = GameState.Start;
+            }).AddTo(this);
+        currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
+        sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
     }
 
     // Update is called once per frame
@@ -103,7 +105,6 @@ public class GameStateManager : MonoBehaviour
 
     private async void OnChangeState()
     {
-
         if (gameState.Value == GameState.Start)
         {
             compositeDisposable.Clear();
@@ -126,12 +127,20 @@ public class GameStateManager : MonoBehaviour
         }
         else if (gameState.Value == GameState.End)
         {
-            await currentRoom.EndRoom();
-            await NextRoom();
+            bool next = await currentRoom.EndRoom();
+
+            if (next)
+            {
+                NextRoom();
+            }
+            else
+            {
+                CommonUtility.Instance.TransitionScene();
+            }
         }
     }
 
-    private async UniTask NextRoom()
+    private void NextRoom()
     {
         if (roomList[++CurrentRoomIndex].ResetRoom)
         {
@@ -144,11 +153,15 @@ public class GameStateManager : MonoBehaviour
         // 次の部屋の設定
         currentRoom = roomList[CurrentRoomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
+        currentRoom.OnInitializeAsync
+            .Subscribe(async _ => 
+            { 
+                await currentRoom.StartRoom();
+
+                // 開始状態に設定
+                gameState.Value = GameState.Start;
+            }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         currentRoom.InitializRoom();
-        await currentRoom.StartRoom();
-
-        // 開始状態に設定
-        gameState.Value = GameState.Start;
     }
 }

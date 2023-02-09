@@ -18,7 +18,10 @@ public class EnableDestroyTarget : Target
     protected override async UniTaskVoid DestroyTarget()
     {
         // 得点追加
-        model.Score.Value += point;
+        if (model.Time.Value > 0)
+        {
+            model.Score.Value += point;
+        }
 
         // 粉砕する
         rayFireRigid.Demolish();

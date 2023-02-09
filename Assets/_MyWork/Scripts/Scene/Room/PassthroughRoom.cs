@@ -12,6 +12,9 @@ public abstract class PassthroughRoom : MonoBehaviour
 {
     public TextMeshProUGUI text;    // デバッグ用
 
+    public IObservable<bool> OnInitializeAsync => onInitializeAsyncSubject;
+    protected readonly AsyncSubject<bool> onInitializeAsyncSubject = new(); // ルーム初期化完了通知用
+
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
 
@@ -34,7 +37,6 @@ public abstract class PassthroughRoom : MonoBehaviour
     protected float cannonOffset = 5;
 
     protected List<Vector3> cornerPoints = new();
-
     
     protected static List<SceneAnchorClassification> sceneAnchorClassifications = new();
 
@@ -85,6 +87,12 @@ public abstract class PassthroughRoom : MonoBehaviour
 
         cannon = cannonParent.GetComponentInChildren<CannonMultiMove>().gameObject;
         cannon.SetActive(false);
+    }
+
+    protected virtual void OnDestroy()
+    {
+        onInitializeAsyncSubject.Dispose();
+        onClearAsyncSubject.Dispose();
     }
 
     protected virtual void Awake()
@@ -248,5 +256,5 @@ public abstract class PassthroughRoom : MonoBehaviour
     /// 部屋の終了
     /// </summary>
     /// <returns></returns>
-    public abstract UniTask EndRoom();
+    public abstract UniTask<bool> EndRoom();
 }

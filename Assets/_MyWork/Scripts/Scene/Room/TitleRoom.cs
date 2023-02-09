@@ -93,8 +93,11 @@ public class TitleRoom : PassthroughRoom
             }
         }
         CullForegroundObjects();
-
         cannonBase.SetActive(false);
+
+        // 初期化完了通知
+        onInitializeAsyncSubject.OnNext(true);
+        onInitializeAsyncSubject.OnCompleted();
     }
 
     public override async UniTask StartRoom()
@@ -111,10 +114,12 @@ public class TitleRoom : PassthroughRoom
         await UniTask.WaitUntil(() => guideDialog.activeSelf, cancellationToken: this.GetCancellationTokenOnDestroy());
     }
 
-    public override async UniTask EndRoom()
+    public override async UniTask<bool> EndRoom()
     {
         // ターゲットオブジェクトが削除されたタイミング
         await UniTask.WaitUntil(() => target == null, cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        return true;
     }
     #endregion
 

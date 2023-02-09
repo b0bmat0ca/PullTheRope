@@ -447,17 +447,17 @@ MonoBehaviour:
   _constraints:
     ConstraintsAreRelative: 1
     MinX:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: -0.1
     MaxX:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 0.1
     MinY:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: -0.1
     MaxY:
-      Constrain: 0
-      Value: 0
+      Constrain: 1
+      Value: 0.1
     MinZ:
       Constrain: 1
       Value: -0.1

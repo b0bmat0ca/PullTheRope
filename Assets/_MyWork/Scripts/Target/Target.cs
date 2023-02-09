@@ -79,6 +79,7 @@ public abstract class Target : MonoBehaviour
     protected void OnDestroy()
     {
         tokenSource.Cancel();
+        onDestroyAsyncSubject.Dispose();
     }
 
     protected virtual void Awake()

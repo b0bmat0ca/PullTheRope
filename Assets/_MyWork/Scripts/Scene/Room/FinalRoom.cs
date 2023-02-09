@@ -8,30 +8,45 @@ using Oculus.Interaction.HandGrab;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.XR.Interaction;
+using UniRx;
 
 public class FinalRoom : PassthroughRoom
 {
+    [SerializeField] RankingInfoPresenter rankingInfoPresenter;
+    [SerializeField] GameObject rankingDialog;
+
+    private bool rankingLoaded = false;
+
     #region PassthroughRoom
     public override void InitializRoom()
     {
-        return;
+        // 初期化完了通知
+        onInitializeAsyncSubject.OnNext(true);
+        onInitializeAsyncSubject.OnCompleted();
     }
 
     public override async UniTask StartRoom()
     {
+        await UniTask.WaitUntil(() => rankingLoaded, cancellationToken: this.GetCancellationTokenOnDestroy());
         await EnablePassthrough();
+
+        rankingDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
+            Quaternion.Euler(new(rankingDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
     }
 
-    public override async UniTask EndRoom()
+    public override async UniTask<bool> EndRoom()
     {
         await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        return false;
     }
     #endregion
 
     // Start is called before the first frame update
     void Start()
     {
-
+        rankingInfoPresenter.OnLodedRankingAsync
+            .Subscribe(_ => rankingLoaded = true).AddTo(this);
     }
 
     // Update is called once per frame

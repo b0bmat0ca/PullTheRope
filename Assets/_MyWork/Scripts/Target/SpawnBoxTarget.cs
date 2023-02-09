@@ -24,10 +24,13 @@ public class SpawnBoxTarget : MonoBehaviour
         public float TargetScale { get { return targetScale;} }
     }
 
+    protected StageModel model;
+
 
     // Start is called before the first frame update
     void Start()
     {
+        model = GameStateManager.Instance.model;
         SpawnTarget().Forget();
     }
 
@@ -41,6 +44,11 @@ public class SpawnBoxTarget : MonoBehaviour
     {
         while (true)
         {
+            // 制限時間外は、生成しない
+            if (model.Time.Value <= 0)
+            {
+                await UniTask.WaitUntil(() => model.Time.Value > 0, cancellationToken: this.GetCancellationTokenOnDestroy());
+            }
             await UniTask.Delay(TimeSpan.FromSeconds(Random.Range(minSpawnTime, maxSpawnTime)), cancellationToken: this.GetCancellationTokenOnDestroy());
             TargetMap target = targetList[Random.Range(0, targetList.Count)];
             GameObject obj = Instantiate(target.Target, transform.position + new Vector3(0, target.OffsetY, 0), Quaternion.identity);
