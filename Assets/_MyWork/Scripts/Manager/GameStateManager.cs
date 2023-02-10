@@ -88,10 +88,13 @@ public class GameStateManager : MonoBehaviour
         currentRoom.OnInitializeAsync
             .Subscribe(async _ =>
             {
-                await currentRoom.StartRoom();
-
                 // 開始状態に設定
                 gameState.Value = GameState.Start;
+
+                // フェード終了時間調整
+                await UniTask.WaitUntil(() => fadeSphere.gameObject.activeSelf == false, cancellationToken: this.GetCancellationTokenOnDestroy());
+                await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: this.GetCancellationTokenOnDestroy());
+                await currentRoom.StartRoom();
             }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
@@ -155,11 +158,11 @@ public class GameStateManager : MonoBehaviour
         currentRoom.gameObject.SetActive(true);
         currentRoom.OnInitializeAsync
             .Subscribe(async _ => 
-            { 
-                await currentRoom.StartRoom();
-
+            {
                 // 開始状態に設定
                 gameState.Value = GameState.Start;
+
+                await currentRoom.StartRoom();
             }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         currentRoom.InitializRoom();

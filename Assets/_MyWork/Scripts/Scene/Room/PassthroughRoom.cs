@@ -18,23 +18,22 @@ public abstract class PassthroughRoom : MonoBehaviour
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
 
-    [Header("砲台の台座"), SerializeField] protected GameObject cannonBase;
+    [Header("砲台"), SerializeField] protected GameObject cannonRoot;
     [Header("弾倉"), SerializeField] protected MagazineCartridgeController magazineCartridge;
 
     protected Transform player;
     protected GameObject cannon;
     
     protected const float groundDelta = 0.02f;
-    protected const float cannonYOffset = 1.33f;
 
     protected Transform envRoot;
     protected OVRHand leftHand;
     protected OVRHand rightHand;
     protected HandGrabInteractor leftHandGrab;
     protected HandGrabInteractor rightHandGrab;
-    protected Transform cannonParent;
+    //protected Transform cannonParent;
     protected GameObject cannonPrefab;
-    protected float cannonOffset = 5;
+    //protected float cannonOffset = 5;
 
     protected List<Vector3> cornerPoints = new();
     
@@ -82,11 +81,7 @@ public abstract class PassthroughRoom : MonoBehaviour
         this.rightHand= rightHand;
         this.leftHandGrab= leftHandGrab;
         this.rightHandGrab= rightHandGrab;
-        this.cannonParent= cannonParent;
         this.cannonPrefab= cannonPrefab;
-
-        cannon = cannonParent.GetComponentInChildren<CannonMultiMove>().gameObject;
-        cannon.SetActive(false);
     }
 
     protected virtual void OnDestroy()
@@ -107,23 +102,17 @@ public abstract class PassthroughRoom : MonoBehaviour
     /// <param name="reset"></param>
     protected void InitializeCannon(bool reset = true)
     {
-        Vector3 cannonPosition = GetPlayerForwardPosition(0.5f, cannonYOffset);
-        Vector3 cannonRotation = new(0, player.eulerAngles.y, 0);
-        Vector3 cannonBasePosition = new(cannonPosition.x, cannonBase.transform.position.y, cannonPosition.z);
-        cannonBase.transform.SetPositionAndRotation(cannonBasePosition, Quaternion.Euler(cannonRotation));
-        cannonBase.SetActive(true);
+        Vector3 cannonRootPosition = GetPlayerForwardPosition(0.8f, cannonRoot.transform.position.y);
+        Vector3 cannonRootRotation = new(0, player.eulerAngles.y, 0);
+        cannonRoot.transform.SetPositionAndRotation(cannonRootPosition, Quaternion.Euler(cannonRootRotation));
 
         if (reset)
         {
-            ResetCannon(cannonPosition, Quaternion.Euler(cannonRotation));
-        }
-        else
-        {
-            cannon.transform.SetPositionAndRotation(cannonPosition, Quaternion.Euler(cannonRotation));
+            ResetCannon(cannon.transform.position, cannon.transform.rotation);
         }
 
         ConfigureCannon();
-        cannon.SetActive(true);
+        cannonRoot.SetActive(true);
     }
 
     /// <summary>
@@ -153,14 +142,6 @@ public abstract class PassthroughRoom : MonoBehaviour
         cannonMultiMove.rightHandAnchor = rightHand.transform;
     }
 
-    protected GameObject CannonInstantiate(Vector3 position, Quaternion rotation)
-    {
-        cannon = Instantiate(cannonPrefab, position, rotation, cannonParent);
-        cannon.SetActive(false);
-
-        return cannon;
-    }
-
     /// <summary>
     /// 砲台のリセット
     /// </summary>
@@ -169,12 +150,13 @@ public abstract class PassthroughRoom : MonoBehaviour
     protected void ResetCannon(Vector3 position, Quaternion rotation)
     {
         Destroy(cannon);
-        CannonInstantiate(position, rotation);
+        cannon = Instantiate(cannonPrefab, position, rotation, cannonRoot.transform);
     }
 
     public void ResetCannon()
     {
         ResetCannon(cannon.transform.position, cannon.transform.rotation);
+        ConfigureCannon();
     }
 
 

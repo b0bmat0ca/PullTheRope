@@ -67,9 +67,9 @@ public class Stage1Room : PassthroughRoom
         }
         CullForegroundObjects();
 
-        // 砲台の位置調整
-        cannonBase.SetActive(false);
-        InitializeCannon();
+        // 砲塔の取得と非表示化
+        cannon = cannonRoot.transform.GetComponentInChildren<CannonMultiMove>().gameObject;
+        cannonRoot.SetActive(false);
 
         // 初期化完了通知
         onInitializeAsyncSubject.OnNext(true);
@@ -78,23 +78,27 @@ public class Stage1Room : PassthroughRoom
 
     public override async UniTask StartRoom()
     {
-        scoreDialog.transform.SetParent(cannon.transform);
+        // @todo ステージスタートの演出
 
-        await UniTask.WaitUntil(() => cannon.activeSelf, cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        // 制限時間を設定
+        model.Time.Value = this.time;
+
+        // 砲塔の初期化
+        InitializeCannon();
 
         roomStart = true;
     }
 
     public override async UniTask<bool> EndRoom()
     {
-        scoreDialog.transform.SetParent(cannonBase.transform);
-
-        cannon.transform.position = new Vector3(0, -10, 0);
+        // @todo ステージ修了の演出
         spawnPoint.SetActive(false);
 
         await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: this.GetCancellationTokenOnDestroy());
 
-        cannonBase.SetActive(false);
+        cannonRoot.SetActive(false);
 
         return true;
     }
@@ -105,11 +109,9 @@ public class Stage1Room : PassthroughRoom
     {
         model = GameStateManager.Instance.model;
 
-        // 制限時間を設定
-        model.Time.Value = this.time;
-
         // 制限時間を購読
         model.Time
+            .Skip(1)
             .Where(x => x == 0)
             .Subscribe( _=>
             {

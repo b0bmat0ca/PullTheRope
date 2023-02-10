@@ -11,6 +11,8 @@ using UnityEngine.Experimental.XR.Interaction;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using DG.Tweening;
+using UnityEngine.Video;
+using UnityEngine.UI;
 
 public class TitleRoom : PassthroughRoom
 {
@@ -20,6 +22,7 @@ public class TitleRoom : PassthroughRoom
     [SerializeField] private EnableDestroyTarget target;
     [SerializeField] private GameObject guideDialog;
     [SerializeField] private InputEventProviderGrabbable inputEventProvider;
+    [SerializeField] private VideoPlayer videoPlayer;
 
     private bool leftPinch = false;
     private bool rightPinch = false;
@@ -93,7 +96,10 @@ public class TitleRoom : PassthroughRoom
             }
         }
         CullForegroundObjects();
-        cannonBase.SetActive(false);
+
+        // 砲塔の取得と非表示化
+        cannon = cannonRoot.transform.GetComponentInChildren<CannonMultiMove>().gameObject;
+        cannonRoot.SetActive(false);
 
         // 初期化完了通知
         onInitializeAsyncSubject.OnNext(true);
@@ -102,17 +108,15 @@ public class TitleRoom : PassthroughRoom
 
     public override async UniTask StartRoom()
     {
+        // 動画の再生開始を待つ
+        await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: this.GetCancellationTokenOnDestroy());
+
         // Center Eye Anchorが準備できるのを待つ
         await UniTask.WaitUntil(() => player.position != Vector3.zero, cancellationToken: this.GetCancellationTokenOnDestroy());
-
         guideDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
-            Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
-
-        guideDialog.SetActive(true);
-
-        // ガイドダイアログが準備できたタイミング
-        await UniTask.WaitUntil(() => guideDialog.activeSelf, cancellationToken: this.GetCancellationTokenOnDestroy());
+            Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));        
     }
+
 
     public override async UniTask<bool> EndRoom()
     {
@@ -147,7 +151,6 @@ public class TitleRoom : PassthroughRoom
     protected override void Awake()
     {
         base.Awake();
-        guideDialog.SetActive(false);
         randomBox.SetActive(false);
         titleText.SetActive(false);
 
@@ -285,6 +288,7 @@ public class TitleRoom : PassthroughRoom
 
         await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
 
+        // 砲塔の初期化
         InitializeCannon(false);
     }
 }
