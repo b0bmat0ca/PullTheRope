@@ -8,9 +8,10 @@ using UniRx;
 using UnityEngine;
 using TMPro;
 
+[RequireComponent(typeof(AudioSource))]
 public abstract class PassthroughRoom : MonoBehaviour
 {
-    public TextMeshProUGUI text;    // デバッグ用
+    //public TextMeshProUGUI text;    // デバッグ用
 
     public IObservable<bool> OnInitializeAsync => onInitializeAsyncSubject;
     protected readonly AsyncSubject<bool> onInitializeAsyncSubject = new(); // ルーム初期化完了通知用
@@ -21,19 +22,65 @@ public abstract class PassthroughRoom : MonoBehaviour
     [Header("砲台"), SerializeField] protected GameObject cannonRoot;
     [Header("弾倉"), SerializeField] protected MagazineCartridgeController magazineCartridge;
 
+    // パーティクルリスト
+    [SerializeField] protected List<ParticleMap> particleList;
+    [System.Serializable]
+    protected class ParticleMap
+    {
+        [SerializeField] private string particleName;
+        [SerializeField] private ParticleSystem particle;
+
+        public string ParticleName { get { return particleName; } }
+        public ParticleSystem Particle { get { return particle; } }
+    }
+    protected ParticleSystem GetParticle(string psName)
+    {
+        foreach (ParticleMap item in particleList)
+        {
+            if (item.ParticleName == psName)
+            {
+                return item.Particle;
+            }
+        }
+        return null;
+    }
+
+    // 効果音リスト
+    [SerializeField] protected List<SEMap> seList;
+    [System.Serializable]
+    protected class SEMap
+    {
+        [SerializeField] private string seName;
+        [SerializeField] private AudioClip se;
+
+        public string SeName { get { return seName; } }
+        public AudioClip Se { get { return se; } }
+    }
+    protected AudioClip GetSE(string seName)
+    {
+        foreach (SEMap item in seList)
+        {
+            if (item.SeName == seName)
+            {
+                return item.Se;
+            }
+        }
+        return null;
+    }
+
     protected Transform player;
     protected GameObject cannon;
     
     protected const float groundDelta = 0.02f;
 
     protected Transform envRoot;
+    protected AudioSource audioSource;
+
     protected OVRHand leftHand;
     protected OVRHand rightHand;
     protected HandGrabInteractor leftHandGrab;
     protected HandGrabInteractor rightHandGrab;
-    //protected Transform cannonParent;
     protected GameObject cannonPrefab;
-    //protected float cannonOffset = 5;
 
     protected List<Vector3> cornerPoints = new();
     
@@ -94,6 +141,7 @@ public abstract class PassthroughRoom : MonoBehaviour
     {
         onClearAsyncSubject.AddTo(this);
         envRoot = this.transform;
+        audioSource = GetComponent<AudioSource>();
     }
 
     /// <summary>

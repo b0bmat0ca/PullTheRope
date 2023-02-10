@@ -80,13 +80,14 @@ public class Stage1Room : PassthroughRoom
     {
         // @todo ステージスタートの演出
 
-        await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
+        // 砲塔の初期化
+        InitializeCannon();
 
         // 制限時間を設定
         model.Time.Value = this.time;
-
-        // 砲塔の初期化
-        InitializeCannon();
+        AudioClip countDown = GetSE("StartCountDown");
+        audioSource.PlayOneShot(countDown);
+        await UniTask.Delay(TimeSpan.FromSeconds(countDown.length), cancellationToken: this.GetCancellationTokenOnDestroy());
 
         roomStart = true;
     }
@@ -104,11 +105,15 @@ public class Stage1Room : PassthroughRoom
     }
     #endregion
 
+    protected override void Awake()
+    {
+        base.Awake();
+        model = GameStateManager.Instance.model;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        model = GameStateManager.Instance.model;
-
         // 制限時間を購読
         model.Time
             .Skip(1)

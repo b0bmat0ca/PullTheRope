@@ -1094,7 +1094,7 @@ MonoBehaviour:
   leftHandInteractor: {fileID: 0}
   rightHandInteractor: {fileID: 0}
   turret: {fileID: 5799845544028306023}
-  trigger: {fileID: 0}
+  trigger: {fileID: 8028849897897913433}
 --- !u!114 &8371534008336034051
 MonoBehaviour:
   m_ObjectHideFlags: 0

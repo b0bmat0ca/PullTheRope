@@ -63,7 +63,6 @@ public class FinalRoom : PassthroughRoom
     {
         foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
-            text.text += sceneAnchorClassification.classification;
             foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
             {
                 sceneAnchor.gameObject.SetActive(!sceneAnchor.gameObject.activeSelf);
