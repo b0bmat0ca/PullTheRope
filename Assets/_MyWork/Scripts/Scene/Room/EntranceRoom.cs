@@ -13,19 +13,24 @@ using UniRx;
 using DG.Tweening;
 using UnityEngine.Video;
 using UnityEngine.UI;
+using System.Threading;
+using DamageNumbersPro;
 
-public class TitleRoom : PassthroughRoom
+public class EntranceRoom : PassthroughRoom
 {
     [SerializeField] private GameObject randomBox;
     [SerializeField] private GameObject titleText;
     [SerializeField] private float titleDistance = 10f;
     [SerializeField] private EnableDestroyTarget target;
-    [SerializeField] private GameObject guideDialog;
-    [SerializeField] private InputEventProviderGrabbable inputEventProvider;
-    [SerializeField] private VideoPlayer videoPlayer;
 
+    [SerializeField] private InputEventProviderGrabbable inputEventProvider;
+
+    [SerializeField] private GameObject guideDialog;
+    [SerializeField] private VideoPlayer videoPlayer;
     private bool leftPinch = false;
     private bool rightPinch = false;
+
+    [SerializeField] private DamageNumber okTextPrefab;
     private bool triggerGrabbed = false;
     private bool turretGrabbed = false;
 
@@ -106,22 +111,22 @@ public class TitleRoom : PassthroughRoom
         onInitializeAsyncSubject.OnCompleted();
     }
 
-    public override async UniTask StartRoom()
+    public override async UniTask StartRoom(CancellationToken token)
     {
         // 動画の再生開始を待つ
-        await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: token);
 
         // Center Eye Anchorが準備できるのを待つ
-        await UniTask.WaitUntil(() => player.position != Vector3.zero, cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.WaitUntil(() => player.position != Vector3.zero, cancellationToken: token);
         guideDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
             Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));        
     }
 
 
-    public override async UniTask<bool> EndRoom()
+    public override async UniTask<bool> EndRoom(CancellationToken token)
     {
         // ターゲットオブジェクトが削除されたタイミング
-        await UniTask.WaitUntil(() => target == null, cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.WaitUntil(() => target == null, cancellationToken: token);
 
         return true;
     }
@@ -160,6 +165,8 @@ public class TitleRoom : PassthroughRoom
             .First()
             .Subscribe(_ =>
             {
+                audioSource.PlayOneShot(GetSE("OKSE"));
+                okTextPrefab.Spawn(cannon.transform.position - new Vector3(0, 0.5f, 0), "OK");
                 triggerGrabbed = true;
                 if (turretGrabbed)
                 {
@@ -173,6 +180,8 @@ public class TitleRoom : PassthroughRoom
             .First()
             .Subscribe(_ =>
             {
+                audioSource.PlayOneShot(GetSE("OKSE"));
+                okTextPrefab.Spawn(cannon.transform.position - new Vector3(0, 0.5f, 0), "OK");
                 turretGrabbed = true;
                 if (triggerGrabbed)
                 {
@@ -252,7 +261,8 @@ public class TitleRoom : PassthroughRoom
     /// </summary>
     private void MoveTarget()
     {
-        target.transform.DOMove(cannon.transform.position + cannon.transform.forward, 2f).SetEase(Ease.InOutSine);
+        audioSource.PlayOneShot(GetSE("MoveTarget"));
+        target.transform.DOMove(cannon.transform.position + cannon.transform.forward, 1f).SetEase(Ease.InOutSine);
     }
 
     /// <summary>

@@ -9,8 +9,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.XR.Interaction;
 using UniRx;
+using System.Threading;
 
-public class FinalRoom : PassthroughRoom
+public class ExitRoom : PassthroughRoom
 {
     [SerializeField] RankingInfoPresenter rankingInfoPresenter;
     [SerializeField] GameObject rankingDialog;
@@ -25,18 +26,18 @@ public class FinalRoom : PassthroughRoom
         onInitializeAsyncSubject.OnCompleted();
     }
 
-    public override async UniTask StartRoom()
+    public override async UniTask StartRoom(CancellationToken token)
     {
-        await UniTask.WaitUntil(() => rankingLoaded, cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.WaitUntil(() => rankingLoaded, cancellationToken: token);
         await EnablePassthrough();
 
         rankingDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
             Quaternion.Euler(new(rankingDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
     }
 
-    public override async UniTask<bool> EndRoom()
+    public override async UniTask<bool> EndRoom(CancellationToken token)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token);
 
         return false;
     }

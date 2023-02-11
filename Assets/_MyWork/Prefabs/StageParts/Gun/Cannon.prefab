@@ -1632,7 +1632,7 @@ GameObject:
   - component: {fileID: 8891773797942876967}
   - component: {fileID: 8891773797942876966}
   - component: {fileID: 8891773797942876965}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: RopeStartPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1776,7 +1776,7 @@ GameObject:
   - component: {fileID: 8891773798303853629}
   - component: {fileID: 8891773798303853628}
   - component: {fileID: 8891773798303853627}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Obi Rope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2002,7 +2002,7 @@ GameObject:
   - component: {fileID: 8891773798570053585}
   - component: {fileID: 8891773798570053594}
   - component: {fileID: 8891773798570053592}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Trigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -8,7 +8,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 using Unity.VisualScripting;
-
+using System.Threading;
 
 public class EnableDestroyTarget : Target
 {
@@ -20,6 +20,7 @@ public class EnableDestroyTarget : Target
         // 得点追加
         if (model.Time.Value > 0)
         {
+            pointTextPrefab.Spawn(transform.position, point);
             model.Score.Value += point;
         }
 

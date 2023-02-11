@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 1413249696607937837}
   - component: {fileID: 1413249696607937838}
   - component: {fileID: 1413249696607937839}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Trigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -623,7 +623,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1413249697550455561}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
@@ -899,7 +899,7 @@ GameObject:
   - component: {fileID: 1413249697666582980}
   - component: {fileID: 1413249697666582981}
   - component: {fileID: 1413249697666582982}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: Obi Rope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1126,7 +1126,7 @@ GameObject:
   - component: {fileID: 1413249697954158754}
   - component: {fileID: 1413249697954158755}
   - component: {fileID: 1413249697954158756}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: RopeStartPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

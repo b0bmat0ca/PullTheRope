@@ -479,6 +479,8 @@ MonoBehaviour:
   targetData: {fileID: 11400000, guid: 02bfa784f098b7c42b08a6cc5c2fb1ba, type: 2}
   colider: {fileID: 3185026045370769194}
   destroyTime: 5
+  pointTextPrefab: {fileID: 7935918780440104752, guid: 674bd25b6e5114d4ba16f2a8feb925d2,
+    type: 3}
   particleList: []
   seList:
   - seName: Instantiate

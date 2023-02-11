@@ -5,7 +5,10 @@ using UniRx;
 using UnityEngine;
 using UniRx.Triggers;
 using Cysharp.Threading.Tasks;
+using DamageNumbersPro.Demo;
+using DamageNumbersPro;
 
+[RequireComponent(typeof(AudioSource))]
 public class CheckPinch : MonoBehaviour
 {
     public IObservable<bool> OnLeftCheckAsync => onLeftCheckAsyncSubject; // 左手OK通知用
@@ -22,11 +25,61 @@ public class CheckPinch : MonoBehaviour
     [SerializeField] private GameObject leftGuideHand;
     [SerializeField] private GameObject rightGuideHand;
 
+    [SerializeField] private DamageNumber okTextPrefab;
+
+    // パーティクルリスト
+    [SerializeField] protected List<ParticleMap> particleList;
+    [System.Serializable]
+    protected class ParticleMap
+    {
+        [SerializeField] private string particleName;
+        [SerializeField] private ParticleSystem particle;
+
+        public string ParticleName { get { return particleName; } }
+        public ParticleSystem Particle { get { return particle; } }
+    }
+    protected ParticleSystem GetParticle(string psName)
+    {
+        foreach (ParticleMap item in particleList)
+        {
+            if (item.ParticleName == psName)
+            {
+                return item.Particle;
+            }
+        }
+        return null;
+    }
+
+    // 効果音リスト
+    [SerializeField] protected List<SEMap> seList;
+    [System.Serializable]
+    protected class SEMap
+    {
+        [SerializeField] private string seName;
+        [SerializeField] private AudioClip se;
+
+        public string SeName { get { return seName; } }
+        public AudioClip Se { get { return se; } }
+    }
+    protected AudioClip GetSE(string seName)
+    {
+        foreach (SEMap item in seList)
+        {
+            if (item.SeName == seName)
+            {
+                return item.Se;
+            }
+        }
+        return null;
+    }
+
+    private AudioSource audioSource;
 
     private void Awake()
     {
         onLeftCheckAsyncSubject.AddTo(this);
         onRightCheckAsyncSubject.AddTo(this);
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Start is called before the first frame update
@@ -41,7 +94,11 @@ public class CheckPinch : MonoBehaviour
                 leftThumbCollider.gameObject.SetActive(false);
                 leftGuideHand.gameObject.SetActive(false);
 
-                await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
+                AudioClip OKSE = GetSE("OKSE");
+                audioSource.PlayOneShot(OKSE);
+                okTextPrefab.Spawn(leftGuideHand.transform.position, "OK");
+
+                await UniTask.Delay(TimeSpan.FromSeconds(OKSE.length), cancellationToken: this.GetCancellationTokenOnDestroy());
 
                 onLeftCheckAsyncSubject.OnNext(true);
                 onLeftCheckAsyncSubject.OnCompleted();
@@ -56,7 +113,11 @@ public class CheckPinch : MonoBehaviour
                 rightThumbCollider.gameObject.SetActive(false);
                 rightGuideHand.gameObject.SetActive(false);
 
-                await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
+                AudioClip OKSE = GetSE("OKSE");
+                audioSource.PlayOneShot(OKSE);
+                okTextPrefab.Spawn(rightGuideHand.transform.position, "OK");
+
+                await UniTask.Delay(TimeSpan.FromSeconds(OKSE.length), cancellationToken: this.GetCancellationTokenOnDestroy());
 
                 onRightCheckAsyncSubject.OnNext(true);
                 onRightCheckAsyncSubject.OnCompleted();
@@ -68,4 +129,5 @@ public class CheckPinch : MonoBehaviour
     {
         
     }
+
 }

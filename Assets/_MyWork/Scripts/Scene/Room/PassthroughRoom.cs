@@ -7,6 +7,7 @@ using Oculus.Platform.Samples.VrHoops;
 using UniRx;
 using UnityEngine;
 using TMPro;
+using System.Threading;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class PassthroughRoom : MonoBehaviour
@@ -131,14 +132,9 @@ public abstract class PassthroughRoom : MonoBehaviour
         this.cannonPrefab= cannonPrefab;
     }
 
-    protected virtual void OnDestroy()
-    {
-        onInitializeAsyncSubject.Dispose();
-        onClearAsyncSubject.Dispose();
-    }
-
     protected virtual void Awake()
     {
+        onInitializeAsyncSubject.AddTo(this);
         onClearAsyncSubject.AddTo(this);
         envRoot = this.transform;
         audioSource = GetComponent<AudioSource>();
@@ -280,11 +276,14 @@ public abstract class PassthroughRoom : MonoBehaviour
     /// <summary>
     /// 部屋の開始
     /// </summary>
-    public abstract UniTask StartRoom();
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public abstract UniTask StartRoom(CancellationToken token);
 
     /// <summary>
     /// 部屋の終了
     /// </summary>
+    /// <param name="token"></param>
     /// <returns></returns>
-    public abstract UniTask<bool> EndRoom();
+    public abstract UniTask<bool> EndRoom(CancellationToken token);
 }

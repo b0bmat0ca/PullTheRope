@@ -6,6 +6,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Pool;
 
+[RequireComponent(typeof(AudioSource))]
 public class MagazineCartridgeController : MonoBehaviour
 {
     [Header("弾丸の発射位置")] public Transform muzzle;
@@ -14,6 +15,12 @@ public class MagazineCartridgeController : MonoBehaviour
 
     private Bullet[] bullets;
     private int currentBulletIndex = 0;
+    private AudioSource audioSource;
+
+    private void Awake()
+    {
+        audioSource= GetComponent<AudioSource>();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -66,6 +73,7 @@ public class MagazineCartridgeController : MonoBehaviour
     {
         bullet.gameObject.SetActive(true);
         bullet.transform.SetPositionAndRotation(muzzle.position, muzzle.rotation);
+        audioSource.PlayOneShot(audioSource.clip);
     }
 
     private void ActionOnRelease(Bullet bullet)

@@ -94,7 +94,7 @@ public class GameStateManager : MonoBehaviour
                 // フェード終了時間調整
                 await UniTask.WaitUntil(() => fadeSphere.gameObject.activeSelf == false, cancellationToken: this.GetCancellationTokenOnDestroy());
                 await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: this.GetCancellationTokenOnDestroy());
-                await currentRoom.StartRoom();
+                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
             }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
@@ -130,7 +130,7 @@ public class GameStateManager : MonoBehaviour
         }
         else if (gameState.Value == GameState.End)
         {
-            bool next = await currentRoom.EndRoom();
+            bool next = await currentRoom.EndRoom(this.GetCancellationTokenOnDestroy());
 
             if (next)
             {
@@ -162,7 +162,7 @@ public class GameStateManager : MonoBehaviour
                 // 開始状態に設定
                 gameState.Value = GameState.Start;
 
-                await currentRoom.StartRoom();
+                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
             }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         currentRoom.InitializRoom();

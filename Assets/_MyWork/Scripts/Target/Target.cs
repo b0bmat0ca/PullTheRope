@@ -6,6 +6,7 @@ using UniRx.Triggers;
 using UniRx;
 using UnityEngine;
 using System;
+using DamageNumbersPro;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class Target : MonoBehaviour
@@ -17,6 +18,8 @@ public abstract class Target : MonoBehaviour
     [SerializeField] protected Collider colider;
     public Collider TargetColider { get { return colider; } }
     [SerializeField] protected float destroyTime = 5.0f;
+
+    [SerializeField] protected DamageNumber pointTextPrefab;
 
     // パーティクルリスト
     [SerializeField] protected List<ParticleMap> particleList;
@@ -79,11 +82,11 @@ public abstract class Target : MonoBehaviour
     protected void OnDestroy()
     {
         tokenSource.Cancel();
-        onDestroyAsyncSubject.Dispose();
     }
 
     protected virtual void Awake()
     {
+        onDestroyAsyncSubject.AddTo(this);
         _name = targetData.Name;
         point = targetData.Point;
         enableLookAt = targetData.EnableLookAt;

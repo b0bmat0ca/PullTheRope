@@ -12,9 +12,13 @@ using UniRx;
 using Cysharp.Threading.Tasks.Linq;
 using Cysharp.Threading.Tasks.Triggers;
 using Cysharp.Threading.Tasks.CompilerServices;
+using System.Threading;
+using MText;
 
-public class Stage1Room : PassthroughRoom
+public class StageRoom : PassthroughRoom
 {
+    [Header("ステージタイトル"), SerializeField] private GameObject stageTitleText;
+    [Header("ステージエンド"), SerializeField] private GameObject stageEndText;
     [Header("制限時間"), SerializeField] private int time = 60;
     [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject scoreDialog;
     [Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
@@ -76,9 +80,10 @@ public class Stage1Room : PassthroughRoom
         onInitializeAsyncSubject.OnCompleted();
     }
 
-    public override async UniTask StartRoom()
+    public override async UniTask StartRoom(CancellationToken token)
     {
-        // @todo ステージスタートの演出
+        // ステージタイトル表示
+        stageTitleText.SetActive(true);
 
         // 砲塔の初期化
         InitializeCannon();
@@ -87,17 +92,27 @@ public class Stage1Room : PassthroughRoom
         model.Time.Value = this.time;
         AudioClip countDown = GetSE("StartCountDown");
         audioSource.PlayOneShot(countDown);
-        await UniTask.Delay(TimeSpan.FromSeconds(countDown.length), cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.Delay(TimeSpan.FromSeconds(countDown.length), cancellationToken: token);
+
+        stageTitleText.SetActive(false);
 
         roomStart = true;
     }
 
-    public override async UniTask<bool> EndRoom()
+    public override async UniTask<bool> EndRoom(CancellationToken token)
     {
-        // @todo ステージ修了の演出
+        // ステージ修了の演出
+        stageEndText.SetActive(true);
+
         spawnPoint.SetActive(false);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: this.GetCancellationTokenOnDestroy());
+        AudioClip end = GetSE("End");
+        audioSource.PlayOneShot(end);
+        await UniTask.Delay(TimeSpan.FromSeconds(end.length), cancellationToken: token);
+
+        stageEndText.SetActive(false);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: token);
 
         cannonRoot.SetActive(false);
 
@@ -109,6 +124,8 @@ public class Stage1Room : PassthroughRoom
     {
         base.Awake();
         model = GameStateManager.Instance.model;
+        stageTitleText.SetActive(false);
+        stageEndText.SetActive(false);
     }
 
     // Start is called before the first frame update
