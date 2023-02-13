@@ -19,14 +19,14 @@ public class GameStateManager : MonoBehaviour
     public static GameStateManager Instance;
     [Header("制限時間、スコアを管理するモデル")] public StageModel model;
 
+    [SerializeField] private MeshRenderer fadeSphere;
+
     public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
 
     [SerializeField] private OVRSceneManager sceneManager;
 
     public IReadOnlyReactiveProperty<GameState> State => gameState;
     private ReactiveProperty<GameState> gameState = new(GameState.Loading); // ゲームの進行状態
-
-    [SerializeField] private MeshRenderer fadeSphere;
 
     [SerializeField] private Transform player;
     [SerializeField] private OVRHand leftHand;
@@ -36,8 +36,6 @@ public class GameStateManager : MonoBehaviour
 
     [Header("砲台の親オブジェクト"), SerializeField] private Transform cannonParent;
     [Header("砲台のプレファブ"), SerializeField] private GameObject cannonPrefab;
-
-    [SerializeField] private float fadeTime = 2f;
 
     // ルームリスト
     [SerializeField] private List<Room> roomList;
@@ -70,17 +68,21 @@ public class GameStateManager : MonoBehaviour
         gameState.Value = GameState.Loading;
 
         fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
+        fadeSphere.gameObject.SetActive(true);
     }
 
     // Start is called before the first frame update
-    void Start()
+    async void Start()
     {
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_ANDROID
         OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
 #endif
-
         // ゲームの進行状態を購読する
         gameState.Subscribe(_ => OnChangeState()).AddTo(this);
+
+        // CenterEyeAnchorの初期化が終わるまで待つ
+        await UniTask.WaitUntil(() => 
+        player.position != Vector3.zero && CommonUtility.Instance != null, cancellationToken: this.GetCancellationTokenOnDestroy());
 
         // ルームの開始
         currentRoom = roomList[CurrentRoomIndex].Instance;
@@ -88,13 +90,10 @@ public class GameStateManager : MonoBehaviour
         currentRoom.OnInitializeAsync
             .Subscribe(async _ =>
             {
+                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
+
                 // 開始状態に設定
                 gameState.Value = GameState.Start;
-
-                // フェード終了時間調整
-                await UniTask.WaitUntil(() => fadeSphere.gameObject.activeSelf == false, cancellationToken: this.GetCancellationTokenOnDestroy());
-                await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: this.GetCancellationTokenOnDestroy());
-                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
             }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
@@ -111,8 +110,6 @@ public class GameStateManager : MonoBehaviour
         if (gameState.Value == GameState.Start)
         {
             compositeDisposable.Clear();
-
-            fadeSphere.gameObject.SetActive(false);
 
             currentRoom.OnClearAsync
                 .Where(x => x)
@@ -134,7 +131,7 @@ public class GameStateManager : MonoBehaviour
 
             if (next)
             {
-                NextRoom();
+                await NextRoom();
             }
             else
             {
@@ -143,13 +140,11 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
-    private void NextRoom()
+    private async UniTask NextRoom()
     {
         if (roomList[++CurrentRoomIndex].ResetRoom)
         {
-            fadeSphere.gameObject.SetActive(true);
-            fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
-
+            await CommonUtility.Instance.FadeOut(this.GetCancellationTokenOnDestroy());
             currentRoom.gameObject.SetActive(false);
         }
         
@@ -159,10 +154,10 @@ public class GameStateManager : MonoBehaviour
         currentRoom.OnInitializeAsync
             .Subscribe(async _ => 
             {
+                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
+
                 // 開始状態に設定
                 gameState.Value = GameState.Start;
-
-                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
             }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
         currentRoom.InitializRoom();

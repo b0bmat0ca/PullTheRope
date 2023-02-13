@@ -12,8 +12,6 @@ using System.Threading;
 [RequireComponent(typeof(AudioSource))]
 public abstract class PassthroughRoom : MonoBehaviour
 {
-    //public TextMeshProUGUI text;    // デバッグ用
-
     public IObservable<bool> OnInitializeAsync => onInitializeAsyncSubject;
     protected readonly AsyncSubject<bool> onInitializeAsyncSubject = new(); // ルーム初期化完了通知用
 
@@ -152,7 +150,7 @@ public abstract class PassthroughRoom : MonoBehaviour
 
         if (reset)
         {
-            ResetCannon(cannon.transform.position, cannon.transform.rotation);
+            ResetCannon(cannon.transform.position, Quaternion.Euler(cannonRootRotation));
         }
 
         ConfigureCannon();

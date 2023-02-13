@@ -34,6 +34,8 @@ public class EntranceRoom : PassthroughRoom
     private bool triggerGrabbed = false;
     private bool turretGrabbed = false;
 
+    private readonly AsyncSubject<bool> onPunchRandomBoxAsyncSubject = new();
+
     #region PassthroughRoom
     public override void InitializRoom()
     {
@@ -116,10 +118,10 @@ public class EntranceRoom : PassthroughRoom
         // 動画の再生開始を待つ
         await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: token);
 
-        // Center Eye Anchorが準備できるのを待つ
-        await UniTask.WaitUntil(() => player.position != Vector3.zero, cancellationToken: token);
         guideDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
-            Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));        
+            Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
+
+        await CommonUtility.Instance.FadeIn(token);
     }
 
 
@@ -156,6 +158,7 @@ public class EntranceRoom : PassthroughRoom
     protected override void Awake()
     {
         base.Awake();
+        onPunchRandomBoxAsyncSubject.AddTo(this);
         randomBox.SetActive(false);
         titleText.SetActive(false);
 
@@ -195,6 +198,7 @@ public class EntranceRoom : PassthroughRoom
     {
         CheckPinch checkPinch = guideDialog.GetComponent<CheckPinch>();
 
+        // 左手の掴むポーズイベントを購読
         checkPinch.OnLeftCheckAsync
             .Subscribe(_ =>
             {
@@ -205,6 +209,7 @@ public class EntranceRoom : PassthroughRoom
                 }
             }).AddTo(this);
 
+        // 右手の掴むポーズイベントを取得
         checkPinch.OnRightCheckAsync
             .Subscribe(_ =>
             {
@@ -215,6 +220,10 @@ public class EntranceRoom : PassthroughRoom
                 }
             }).AddTo(this);
 
+        // ランダムボックスをパンチしたイベントを購読
+        onPunchRandomBoxAsyncSubject
+            .Subscribe(async _ => await DisablePassthrough())
+            .AddTo(this);
 
         // ターゲットが破壊されたかを購読
         target.OnDestroyAsync
@@ -253,7 +262,8 @@ public class EntranceRoom : PassthroughRoom
     /// </summary>
     public void PunchRandomBox()
     {
-        DisablePassthrough().Forget();
+        onPunchRandomBoxAsyncSubject.OnNext(true);
+        onPunchRandomBoxAsyncSubject.OnCompleted();
     }
 
     /// <summary>
@@ -273,6 +283,13 @@ public class EntranceRoom : PassthroughRoom
     {
         randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
 
+        ParticleSystem toVirtual = GetParticle("ToVirtual");
+        toVirtual.Play();
+
+        //await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: this.GetCancellationTokenOnDestroy());
+        //CommonUtility.Instance.FadeOut();
+        await CommonUtility.Instance.FadeOut(this.GetCancellationTokenOnDestroy(), 5);
+
         foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
             if (sceneAnchorClassification.classification == OVRSceneManager.Classification.Couch ||
@@ -287,7 +304,6 @@ public class EntranceRoom : PassthroughRoom
             {
                 sceneAnchor.gameObject.SetActive(false);    // 現実世界を見えなくする
             }
-            await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
         }
 
         Vector3 titleTextPosition = new Vector3(player.forward.x, 0, player.forward.z).normalized
@@ -296,9 +312,12 @@ public class EntranceRoom : PassthroughRoom
         titleText.transform.LookAt(new Vector3(player.position.x, titleText.transform.position.y, player.position.z));
         titleText.SetActive(true);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
-
         // 砲塔の初期化
         InitializeCannon(false);
+
+        toVirtual.Stop();
+        toVirtual.Clear();
+
+        await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
     }
 }

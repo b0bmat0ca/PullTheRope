@@ -82,11 +82,13 @@ public class StageRoom : PassthroughRoom
 
     public override async UniTask StartRoom(CancellationToken token)
     {
-        // ステージタイトル表示
-        stageTitleText.SetActive(true);
-
         // 砲塔の初期化
         InitializeCannon();
+
+        await CommonUtility.Instance.FadeIn(token);
+
+        // ステージタイトル表示
+        stageTitleText.SetActive(true);
 
         // 制限時間を設定
         model.Time.Value = this.time;
