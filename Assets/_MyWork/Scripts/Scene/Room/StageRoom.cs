@@ -72,8 +72,8 @@ public class StageRoom : PassthroughRoom
         CullForegroundObjects();
 
         // 砲塔の取得と非表示化
-        cannon = cannonRoot.transform.GetComponentInChildren<CannonMultiMove>().gameObject;
-        cannonRoot.SetActive(false);
+        cannon = cannonParent.gameObject.transform.GetComponentInChildren<CannonMultiMove>().gameObject;
+        cannonParent.gameObject.SetActive(false);
 
         // 初期化完了通知
         onInitializeAsyncSubject.OnNext(true);
@@ -114,9 +114,9 @@ public class StageRoom : PassthroughRoom
 
         stageEndText.SetActive(false);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: token);
+        await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: token);
 
-        cannonRoot.SetActive(false);
+        cannonParent.gameObject.SetActive(false);
 
         return true;
     }

@@ -62,13 +62,16 @@ public class ExitRoom : PassthroughRoom
     /// <returns></returns>
     private async UniTask EnablePassthrough()
     {
+        CommonUtility.Instance.FadeOut();
+
         foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
             foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
             {
                 sceneAnchor.gameObject.SetActive(!sceneAnchor.gameObject.activeSelf);
             }
-            await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: this.GetCancellationTokenOnDestroy());
         }
+
+        CommonUtility.Instance.FadeIn();
     }
 }

@@ -19,6 +19,8 @@ public sealed class CommonUtility : MonoBehaviour
 
     [SerializeField] private MeshRenderer fadeSphere;
 
+    [SerializeField] private OVRScreenFade2 screenFade;
+
 
     private void Awake()
     {
@@ -30,6 +32,11 @@ public sealed class CommonUtility : MonoBehaviour
         {
             Destroy(this);
         }
+    }
+
+    private void OnEnable()
+    {
+        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
     }
 
     // Start is called before the first frame update
@@ -49,9 +56,15 @@ public sealed class CommonUtility : MonoBehaviour
         debugText.text += $"{message}\n";
     }
 
+    public void ExitExplicitFade()
+    {
+        screenFade.SetExplicitFade(0);
+    }
+
     public void FadeIn()
     {
         fadeSphere.gameObject.SetActive(false);
+        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
     }
 
     public async UniTask<bool> FadeIn(CancellationToken token, float fadeTime = 2)
@@ -59,12 +72,12 @@ public sealed class CommonUtility : MonoBehaviour
         await fadeSphere.sharedMaterial.DOFade(0, fadeTime)
             .OnComplete(() =>
             {
-                fadeSphere.gameObject.SetActive(false);
-                fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
+                FadeIn();
             }).ToUniTask(cancellationToken: token);
 
         return true;
     }
+
 
     public void FadeOut()
     {

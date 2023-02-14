@@ -11,31 +11,23 @@ using System;
 using Unity.VisualScripting.Antlr3.Runtime;
 using Oculus.Platform.Models;
 using TMPro;
+using Unity.VisualScripting;
 
 [RequireComponent(typeof(StageModel))]
 [RequireComponent(typeof(CommonUtility))]
 public class GameStateManager : MonoBehaviour
 {
-    public static GameStateManager Instance;
-    [Header("制限時間、スコアを管理するモデル")] public StageModel model;
-
-    [SerializeField] private MeshRenderer fadeSphere;
-
-    public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
+    //[SerializeField] private MeshRenderer fadeSphere;
 
     [SerializeField] private OVRSceneManager sceneManager;
+
+    public static GameStateManager Instance;
+    [Header("制限時間、スコアを管理するモデル")] public StageModel model;
 
     public IReadOnlyReactiveProperty<GameState> State => gameState;
     private ReactiveProperty<GameState> gameState = new(GameState.Loading); // ゲームの進行状態
 
-    [SerializeField] private Transform player;
-    [SerializeField] private OVRHand leftHand;
-    [SerializeField] private OVRHand rightHand;
-    [SerializeField] private HandGrabInteractor leftHandGrab;
-    [SerializeField] private HandGrabInteractor rightHandGrab;
-
-    [Header("砲台の親オブジェクト"), SerializeField] private Transform cannonParent;
-    [Header("砲台のプレファブ"), SerializeField] private GameObject cannonPrefab;
+    public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
 
     // ルームリスト
     [SerializeField] private List<Room> roomList;
@@ -53,6 +45,15 @@ public class GameStateManager : MonoBehaviour
     }
     private PassthroughRoom currentRoom;
 
+    [SerializeField] private Transform player;
+    [SerializeField] private OVRHand leftHand;
+    [SerializeField] private OVRHand rightHand;
+    [SerializeField] private HandGrabInteractor leftHandGrab;
+    [SerializeField] private HandGrabInteractor rightHandGrab;
+
+    [Header("砲台の親オブジェクト"), SerializeField] private Transform cannonParent;
+    [Header("砲台のプレファブ"), SerializeField] private GameObject cannonPrefab;
+    
     private readonly CompositeDisposable compositeDisposable = new();
 
     private void Awake()
@@ -66,9 +67,11 @@ public class GameStateManager : MonoBehaviour
 
         gameState.AddTo(this);
         gameState.Value = GameState.Loading;
+    }
 
-        fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
-        fadeSphere.gameObject.SetActive(true);
+    private void OnEnable()
+    {
+        cannonParent.gameObject.SetActive(false);
     }
 
     // Start is called before the first frame update
@@ -83,6 +86,8 @@ public class GameStateManager : MonoBehaviour
         // CenterEyeAnchorの初期化が終わるまで待つ
         await UniTask.WaitUntil(() => 
         player.position != Vector3.zero && CommonUtility.Instance != null, cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        //CommonUtility.Instance.ExitExplicitFade();
 
         // ルームの開始
         currentRoom = roomList[CurrentRoomIndex].Instance;
