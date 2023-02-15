@@ -14,14 +14,17 @@ using Cysharp.Threading.Tasks.Triggers;
 using Cysharp.Threading.Tasks.CompilerServices;
 using System.Threading;
 using MText;
+using TMPro;
 
 public class StageRoom : PassthroughRoom
 {
-    [Header("ステージタイトル"), SerializeField] private GameObject stageTitleText;
-    [Header("ステージエンド"), SerializeField] private GameObject stageEndText;
+    [Header("HUDキャンバス"), SerializeField] private GameObject hudCanvas;
+    [Header("HUDテキスト"), SerializeField] private TextMeshProUGUI hudText;
     [Header("制限時間"), SerializeField] private int time = 60;
     [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject scoreDialog;
     [Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
+
+    private int stageIndex = 1;
 
     private float currentTime = 0;
     private StageModel model;
@@ -88,35 +91,46 @@ public class StageRoom : PassthroughRoom
         await CommonUtility.Instance.FadeIn(token);
 
         // ステージタイトル表示
-        stageTitleText.SetActive(true);
+        hudText.text = $"Stage {stageIndex}";
+        hudCanvas.SetActive(true);
+        
 
         // 制限時間を設定
         model.Time.Value = this.time;
         AudioClip countDown = GetSE("StartCountDown");
-        audioSource.PlayOneShot(countDown);
+        SEPlay(countDown);
         await UniTask.Delay(TimeSpan.FromSeconds(countDown.length), cancellationToken: token);
 
-        stageTitleText.SetActive(false);
+        hudCanvas.SetActive(false);
+
+        BGMPlay();
 
         roomStart = true;
     }
 
     public override async UniTask<bool> EndRoom(CancellationToken token)
     {
-        // ステージ修了の演出
-        stageEndText.SetActive(true);
+        ParticleSystem toReal = GetParticle("ToReal");
+
+        // ステージ終了の演出
+
+        // ステージエンドタイトル表示
+        hudText.text = $"Stage {stageIndex} End";
+        hudCanvas.SetActive(true);
 
         spawnPoint.SetActive(false);
 
         AudioClip end = GetSE("End");
-        audioSource.PlayOneShot(end);
+        SEPlay(end);
         await UniTask.Delay(TimeSpan.FromSeconds(end.length), cancellationToken: token);
 
-        stageEndText.SetActive(false);
+        hudCanvas.SetActive(false);
 
         await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: token);
-
         cannonParent.gameObject.SetActive(false);
+
+        toReal.gameObject.SetActive(true);
+        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
 
         return true;
     }
@@ -126,8 +140,7 @@ public class StageRoom : PassthroughRoom
     {
         base.Awake();
         model = GameStateManager.Instance.model;
-        stageTitleText.SetActive(false);
-        stageEndText.SetActive(false);
+        hudCanvas.SetActive(false);
     }
 
     // Start is called before the first frame update
@@ -139,6 +152,8 @@ public class StageRoom : PassthroughRoom
             .Where(x => x == 0)
             .Subscribe( _=>
             {
+                BGMPlay(true);
+
                 onClearAsyncSubject.OnNext(true);
                 onClearAsyncSubject.OnCompleted();
             }).AddTo(this);

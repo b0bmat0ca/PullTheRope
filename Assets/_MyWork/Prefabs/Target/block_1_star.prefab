@@ -819,6 +819,7 @@ MonoBehaviour:
   targetData: {fileID: 11400000, guid: dc5d814811f922444bca0d7c00ba1a88, type: 2}
   colider: {fileID: 7331894448490341721}
   destroyTime: 20
+  pointTextPrefab: {fileID: 0}
   particleList: []
   seList:
   - seName: BulletHit

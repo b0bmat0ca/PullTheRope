@@ -7,6 +7,8 @@ using UniRx.Triggers;
 using Cysharp.Threading.Tasks;
 using DamageNumbersPro.Demo;
 using DamageNumbersPro;
+using Unity.VisualScripting;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(AudioSource))]
 public class CheckPinch : MonoBehaviour
@@ -73,54 +75,82 @@ public class CheckPinch : MonoBehaviour
         return null;
     }
 
+    private Camera mainCamera;
     private AudioSource audioSource;
+
+    private bool visibleLeftFinger = false;
+    private bool visibleRightFinger = false;
 
     private void Awake()
     {
         onLeftCheckAsyncSubject.AddTo(this);
         onRightCheckAsyncSubject.AddTo(this);
+        mainCamera = Camera.main;
         audioSource = GetComponent<AudioSource>();
     }
+
 
     // Start is called before the first frame update
     void Start()
     {
-        // 左手の人差し指と親指の衝突
+        // 左手がカメラに写っているか購読
+        leftIndexCollider.gameObject.GetComponent<VisibleCamera>()
+            .OnVisibleCamera
+            .Subscribe(x =>
+            {
+                visibleLeftFinger = x;
+            }).AddTo(this);
+
+        // 右手がカメラに写っているか購読
+        rightIndexCollider.gameObject.GetComponent<VisibleCamera>()
+            .OnVisibleCamera
+            .Subscribe(x =>
+            {
+                visibleRightFinger = x;
+            }).AddTo(this);
+
+        // 左手の人差し指と親指の衝突を購読
         leftIndexCollider.OnTriggerEnterAsObservable()
             .Where(other => other.CompareTag("LeftFinger"))
             .Subscribe(async _ =>
             {
-                leftIndexCollider.gameObject.SetActive(false);
-                leftThumbCollider.gameObject.SetActive(false);
-                leftGuideHand.gameObject.SetActive(false);
+                if (visibleLeftFinger)
+                {
+                    leftIndexCollider.gameObject.SetActive(false);
+                    leftThumbCollider.gameObject.SetActive(false);
+                    leftGuideHand.gameObject.SetActive(false);
 
-                AudioClip OKSE = GetSE("OKSE");
-                audioSource.PlayOneShot(OKSE);
-                okTextPrefab.Spawn(leftGuideHand.transform.position, "OK");
+                    AudioClip OKSE = GetSE("OKSE");
+                    audioSource.PlayOneShot(OKSE);
+                    okTextPrefab.Spawn(leftGuideHand.transform.position, "OK");
 
-                await UniTask.Delay(TimeSpan.FromSeconds(OKSE.length), cancellationToken: this.GetCancellationTokenOnDestroy());
+                    await UniTask.Delay(TimeSpan.FromSeconds(OKSE.length), cancellationToken: this.GetCancellationTokenOnDestroy());
 
-                onLeftCheckAsyncSubject.OnNext(true);
-                onLeftCheckAsyncSubject.OnCompleted();
+                    onLeftCheckAsyncSubject.OnNext(true);
+                    onLeftCheckAsyncSubject.OnCompleted();
+                }
             }).AddTo(this);
 
-        // 右手の人差し指と親指の衝突
+        // 右手の人差し指と親指の衝突を購読
         rightIndexCollider.OnTriggerEnterAsObservable()
             .Where(other => other.CompareTag("RightFinger"))
             .Subscribe(async _ =>
             {
-                rightIndexCollider.gameObject.SetActive(false);
-                rightThumbCollider.gameObject.SetActive(false);
-                rightGuideHand.gameObject.SetActive(false);
+                if (visibleRightFinger)
+                {
+                    rightIndexCollider.gameObject.SetActive(false);
+                    rightThumbCollider.gameObject.SetActive(false);
+                    rightGuideHand.gameObject.SetActive(false);
 
-                AudioClip OKSE = GetSE("OKSE");
-                audioSource.PlayOneShot(OKSE);
-                okTextPrefab.Spawn(rightGuideHand.transform.position, "OK");
+                    AudioClip OKSE = GetSE("OKSE");
+                    audioSource.PlayOneShot(OKSE);
+                    okTextPrefab.Spawn(rightGuideHand.transform.position, "OK");
 
-                await UniTask.Delay(TimeSpan.FromSeconds(OKSE.length), cancellationToken: this.GetCancellationTokenOnDestroy());
+                    await UniTask.Delay(TimeSpan.FromSeconds(OKSE.length), cancellationToken: this.GetCancellationTokenOnDestroy());
 
-                onRightCheckAsyncSubject.OnNext(true);
-                onRightCheckAsyncSubject.OnCompleted();
+                    onRightCheckAsyncSubject.OnNext(true);
+                    onRightCheckAsyncSubject.OnCompleted();
+                }
             }).AddTo(this);
     }
 
@@ -129,5 +159,4 @@ public class CheckPinch : MonoBehaviour
     {
         
     }
-
 }

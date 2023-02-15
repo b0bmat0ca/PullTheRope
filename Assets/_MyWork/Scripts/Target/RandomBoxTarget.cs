@@ -69,6 +69,11 @@ public class RandomBoxTarget : Target
 
     public void DestroyBox()
     {
+        if (onDestroy)
+        {
+            return;
+        }
+
         DestroyTarget().Forget();
     }
 }

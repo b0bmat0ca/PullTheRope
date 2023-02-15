@@ -8,6 +8,7 @@ using UniRx;
 using UnityEngine;
 using TMPro;
 using System.Threading;
+using UnityEngine.Timeline;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class PassthroughRoom : MonoBehaviour
@@ -65,6 +66,7 @@ public abstract class PassthroughRoom : MonoBehaviour
         }
         return null;
     }
+    protected AudioSource[] audioSources;
 
     protected Transform player;
     protected GameObject cannon;
@@ -72,8 +74,7 @@ public abstract class PassthroughRoom : MonoBehaviour
     protected const float groundDelta = 0.02f;
 
     protected Transform envRoot;
-    protected AudioSource audioSource;
-
+    
     protected OVRHand leftHand;
     protected OVRHand rightHand;
     protected HandGrabInteractor leftHandGrab;
@@ -136,7 +137,31 @@ public abstract class PassthroughRoom : MonoBehaviour
         onInitializeAsyncSubject.AddTo(this);
         onClearAsyncSubject.AddTo(this);
         envRoot = this.transform;
-        audioSource = GetComponent<AudioSource>();
+        audioSources = GetComponents<AudioSource>();
+    }
+
+    /// <summary>
+    /// BGMの開始、終了
+    /// </summary>
+    /// <param name="stop"></param>
+    protected void BGMPlay(bool stop = false)
+    {
+        if (stop)
+        {
+            audioSources[0].Stop();
+            return;
+        }
+        audioSources[0].Play();
+    }
+
+    /// <summary>
+    /// 効果音の開始
+    /// </summary>
+    /// <param name="audioClip"></param>
+    /// <param name="volume"></param>
+    protected void SEPlay(AudioClip audioClip, float volume = 1)
+    {
+        audioSources[1].PlayOneShot(audioClip, volume);
     }
 
     /// <summary>

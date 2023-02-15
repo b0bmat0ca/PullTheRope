@@ -19,10 +19,11 @@ using Unity.VisualScripting.Antlr3.Runtime;
 
 public class EntranceRoom : PassthroughRoom
 {
-    [SerializeField] private GameObject randomBox;
     [SerializeField] private GameObject titleText;
     [SerializeField] private float titleDistance = 10f;
     [SerializeField] private EnableDestroyTarget target;
+
+    [SerializeField] private GameObject randomBox;
 
     [SerializeField] private InputEventProviderGrabbable inputEventProvider;
 
@@ -187,7 +188,7 @@ public class EntranceRoom : PassthroughRoom
                 }
             }).AddTo(this);
 
-        // 右手の掴むポーズイベントを取得
+        // 右手の掴むポーズイベントを購読
         checkPinch.OnRightCheckAsync
             .Subscribe(_ =>
             {
@@ -203,13 +204,13 @@ public class EntranceRoom : PassthroughRoom
             .Subscribe(async _ => await DisablePassthrough())
             .AddTo(this);
 
-        // 初めてトリガーを握ったイベントを取得
+        // 初めてトリガーを握ったイベントを購読
         inputEventProvider.IsTriggerGrab
             .Where(x => x)
             .First()
             .Subscribe(_ =>
             {
-                audioSource.PlayOneShot(GetSE("OKSE"));
+                SEPlay(GetSE("OKSE"));
                 okTextPrefab.Spawn(cannon.transform.position - new Vector3(0, 0.5f, 0), "OK");
                 triggerGrabbed = true;
                 if (turretGrabbed)
@@ -218,13 +219,13 @@ public class EntranceRoom : PassthroughRoom
                 }
             }).AddTo(this);
 
-        // 初めて砲塔を握ったイベントを取得
+        // 初めて砲塔を握ったイベントを購読
         inputEventProvider.IsTurretGrab
             .Where(x => x)
             .First()
             .Subscribe(_ =>
             {
-                audioSource.PlayOneShot(GetSE("OKSE"));
+                SEPlay(GetSE("OKSE"));
                 okTextPrefab.Spawn(cannon.transform.position - new Vector3(0, 0.5f, 0), "OK");
                 turretGrabbed = true;
                 if (triggerGrabbed)
@@ -238,6 +239,8 @@ public class EntranceRoom : PassthroughRoom
             .Where(x => x)
             .Subscribe(_ =>
             {
+                BGMPlay(true);
+
                 onClearAsyncSubject.OnNext(true);
                 onClearAsyncSubject.OnCompleted();
             });
@@ -279,7 +282,7 @@ public class EntranceRoom : PassthroughRoom
     /// </summary>
     private void MoveTarget()
     {
-        audioSource.PlayOneShot(GetSE("MoveTarget"));
+        SEPlay(GetSE("MoveTarget"));
         target.transform.DOMove(cannon.transform.position + cannon.transform.forward * 3, 1f).SetEase(Ease.InOutSine);
     }
 
@@ -289,13 +292,12 @@ public class EntranceRoom : PassthroughRoom
     /// <returns></returns>
     private async UniTask DisablePassthrough()
     {
-        randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
-
         ParticleSystem toVirtual = GetParticle("ToVirtual");
-        toVirtual.Play();
-        await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: this.GetCancellationTokenOnDestroy());
 
-        CommonUtility.Instance.FadeOut();
+        randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
+        await UniTask.WaitUntil(() => randomBox == null, cancellationToken: this.GetCancellationTokenOnDestroy());
+
+        CommonUtility.Instance.FadeOut();   // 現実世界で徐々にフェードアウトさせるとVR世界が写り込むため、即時フェードアウトさせる
 
         foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
@@ -321,10 +323,10 @@ public class EntranceRoom : PassthroughRoom
 
         // 砲塔の初期化
         InitializeCannon(false);
-
-        toVirtual.Stop();
-        toVirtual.Clear();
-
+        toVirtual.gameObject.transform.position = new Vector3(player.position.x, 0, player.position.z);
+        toVirtual.gameObject.SetActive(true);
         await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
+        await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: this.GetCancellationTokenOnDestroy());
+        BGMPlay();
     }
 }

@@ -5,15 +5,16 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(AudioSource))]
 public class SpawnBoxTarget : MonoBehaviour
 {
     [SerializeField] private float minSpawnTime = 5;
     [SerializeField] private float maxSpawnTime = 15;
 
     // ターゲットリスト
-    [SerializeField] protected List<TargetMap> targetList;
+    [SerializeField] private List<TargetMap> targetList;
     [System.Serializable]
-    protected class TargetMap
+    private class TargetMap
     {
         [SerializeField] private GameObject target;
         [SerializeField] private float offsetY;
@@ -24,12 +25,13 @@ public class SpawnBoxTarget : MonoBehaviour
         public float TargetScale { get { return targetScale;} }
     }
 
-    protected StageModel model;
-
+    private AudioSource audioSource;
+    private StageModel model;
 
     // Start is called before the first frame update
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         model = GameStateManager.Instance.model;
         SpawnTarget().Forget();
     }
@@ -56,6 +58,7 @@ public class SpawnBoxTarget : MonoBehaviour
             obj.transform.localScale *= target.TargetScale;
             obj.transform.SetParent(gameObject.transform);
             obj.SetActive(true);
+            audioSource.Play();
             await UniTask.WaitUntil(() => obj == null, cancellationToken: this.GetCancellationTokenOnDestroy());
         }
     }
