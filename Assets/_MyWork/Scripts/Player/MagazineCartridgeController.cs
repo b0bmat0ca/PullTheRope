@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UniRx;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -10,10 +11,11 @@ using UnityEngine.Pool;
 public class MagazineCartridgeController : MonoBehaviour
 {
     [Header("弾丸の発射位置")] public Transform muzzle;
-
+    
     [NonSerialized] public ObjectPool<Bullet> bulletPool;
 
-    private Bullet[] bullets;
+    [Header("弾丸のPrafab"), SerializeField] private GameObject bulletPrefab;
+    private Bullet[] bullets = new Bullet[20];
     private int currentBulletIndex = 0;
     private AudioSource audioSource;
 
@@ -25,32 +27,7 @@ public class MagazineCartridgeController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // オブジェクトプール用の弾丸を取得
-        bullets = GetComponentsInChildren<Bullet>();
-
-        foreach (Bullet bullet in bullets)
-        {
-            // リリース状態を購読
-            bullet.onRelease
-                .Where(x => x)
-                .Subscribe(_ =>
-                {
-                    bullet.onRelease.Value = false;
-                    bulletPool.Release(bullet);
-                }).AddTo(this);
-
-            bullet.gameObject.SetActive(false);
-        }
-
-        // オブジェクトプールの生成
-        bulletPool = new ObjectPool<Bullet>(
-            CreateFunc,
-            ActionOnGet,
-            ActionOnRelease,
-            ActionOnDestroy,
-            collectionCheck: true,
-            defaultCapacity: bullets.Length,
-            maxSize: bullets.Length);
+        ResetBullet(bulletPrefab);
     }
 
     // Update is called once per frame
@@ -84,5 +61,33 @@ public class MagazineCartridgeController : MonoBehaviour
     private void ActionOnDestroy(Bullet bullet)
     {
         Destroy(bullet.gameObject);
+    }
+
+    public void ResetBullet(GameObject prefab)
+    {
+        // オブジェクトプール用の弾丸を取得して、Bulletコンポーネントを付与
+        for (int i = 0; i < bullets.Length; i++)
+        {
+            Bullet bullet = Instantiate(prefab, this.transform).AddComponent<Bullet>();
+            bullets[i] = bullet;
+            bullet.onRelease
+                .Where(x => x)
+                .Subscribe(_ =>
+                {
+                    bullet.onRelease.Value = false;
+                    bulletPool.Release(bullet);
+                }).AddTo(this);
+            bullet.gameObject.SetActive(false);
+        }
+
+        // オブジェクトプールの生成
+        bulletPool = new ObjectPool<Bullet>(
+            CreateFunc,
+            ActionOnGet,
+            ActionOnRelease,
+            ActionOnDestroy,
+            collectionCheck: true,
+            defaultCapacity: bullets.Length,
+            maxSize: bullets.Length);
     }
 }

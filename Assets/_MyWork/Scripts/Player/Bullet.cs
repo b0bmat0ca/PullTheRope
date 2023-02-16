@@ -9,7 +9,7 @@ public class Bullet : MonoBehaviour
 {
     public ReactiveProperty<bool> onRelease = new(false);   // オブジェクトプールにリリースを許可するフラグ
 
-    [Header("弾丸の生存時間"), SerializeField] private double lifeTIme = 3.0;
+    [Header("弾丸の生存時間")] public double lifeTIme = 3.0;
 
     private Rigidbody _rigidbody;
 

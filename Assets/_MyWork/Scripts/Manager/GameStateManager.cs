@@ -12,22 +12,31 @@ using Unity.VisualScripting.Antlr3.Runtime;
 using Oculus.Platform.Models;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.AddressableAssets;
 
 [RequireComponent(typeof(StageModel))]
 [RequireComponent(typeof(CommonUtility))]
 public class GameStateManager : MonoBehaviour
 {
-    //[SerializeField] private MeshRenderer fadeSphere;
+    public static GameStateManager Instance;
+
+    public int maxStageCount;
 
     [SerializeField] private OVRSceneManager sceneManager;
 
-    public static GameStateManager Instance;
+
     [Header("制限時間、スコアを管理するモデル")] public StageModel model;
 
     public IReadOnlyReactiveProperty<GameState> State => gameState;
     private ReactiveProperty<GameState> gameState = new(GameState.Loading); // ゲームの進行状態
 
     public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
+
+    // ゲーム情報
+    private class PullTheRope
+    {
+        public int Stage;
+    }
 
     // ルームリスト
     [SerializeField] private List<Room> roomList;
@@ -80,6 +89,11 @@ public class GameStateManager : MonoBehaviour
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_ANDROID
         OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
 #endif
+        // ステージ数の読み込み
+        TextAsset pullTheRope = await Addressables.LoadAssetAsync<TextAsset>("PullTheRope").Task;
+        PullTheRope info = JsonUtility.FromJson<PullTheRope>(pullTheRope.ToString());
+        maxStageCount = info.Stage;
+
         // ゲームの進行状態を購読する
         gameState.Subscribe(_ => OnChangeState()).AddTo(this);
 
