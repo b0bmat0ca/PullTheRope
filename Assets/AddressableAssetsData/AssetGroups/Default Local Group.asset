@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: 8782ac48e5f626442b2db3da55741c28
   m_SerializeEntries:
   - m_GUID: ef49de2547a3faf438de794395b7d8a4
-    m_Address: PullTheRope
+    m_Address: StageInfo
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

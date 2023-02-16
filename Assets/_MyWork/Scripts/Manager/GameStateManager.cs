@@ -20,8 +20,6 @@ public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance;
 
-    public int maxStageCount;
-
     [SerializeField] private OVRSceneManager sceneManager;
 
 
@@ -32,11 +30,6 @@ public class GameStateManager : MonoBehaviour
 
     public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
 
-    // ゲーム情報
-    private class PullTheRope
-    {
-        public int Stage;
-    }
 
     // ルームリスト
     [SerializeField] private List<Room> roomList;
@@ -89,10 +82,6 @@ public class GameStateManager : MonoBehaviour
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_ANDROID
         OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
 #endif
-        // ステージ数の読み込み
-        TextAsset pullTheRope = await Addressables.LoadAssetAsync<TextAsset>("PullTheRope").Task;
-        PullTheRope info = JsonUtility.FromJson<PullTheRope>(pullTheRope.ToString());
-        maxStageCount = info.Stage;
 
         // ゲームの進行状態を購読する
         gameState.Subscribe(_ => OnChangeState()).AddTo(this);

@@ -26,12 +26,18 @@ public class StageRoom : PassthroughRoom
     [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject scoreDialog;
     [Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
 
-    private int stageIndex = 1;
-
     private float currentTime = 0;
     private StageModel model;
 
     private bool roomStart = false;
+
+    // Stage情報
+    private class StageInfo
+    {
+        public int Stage;
+    }
+    private int maxStageCount = 0;
+    private int stageIndex = 1;
 
     [Header("ステージ用アセット")]
     [Header("SkyBox"), SerializeField] private GameObject skyBox;
@@ -154,8 +160,13 @@ public class StageRoom : PassthroughRoom
     }
 
     // Start is called before the first frame update
-    void Start()
+   async  void Start()
     {
+        // ステージ数の読み込み
+        TextAsset pullTheRope = await Addressables.LoadAssetAsync<TextAsset>("StageInfo").Task;
+        StageInfo info = JsonUtility.FromJson<StageInfo>(pullTheRope.ToString());
+        maxStageCount = info.Stage;
+
         // 制限時間を購読
         model.Time
             .Skip(1)
@@ -164,7 +175,7 @@ public class StageRoom : PassthroughRoom
             {
                 BGMPlay(true);
 
-                if (GameStateManager.Instance.maxStageCount == stageIndex)
+                if (maxStageCount == stageIndex)
                 {
                     onClearAsyncSubject.OnNext(true);
                     onClearAsyncSubject.OnCompleted();
