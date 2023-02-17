@@ -267,7 +267,9 @@ MonoBehaviour:
   - seName: Instantiate
     se: {fileID: 8300000, guid: 76018432deecb084e85e7ac111391748, type: 3}
   - seName: BulletHit
-    se: {fileID: 8300000, guid: ba3ffe3597e7f7446aebb4e769a2c786, type: 3}
+    se: {fileID: 8300000, guid: 18b50cea912c66d4481b88f248fff9d6, type: 3}
+  - seName: HandHit
+    se: {fileID: 8300000, guid: 18b50cea912c66d4481b88f248fff9d6, type: 3}
 --- !u!54 &-1733352474569067642
 Rigidbody:
   m_ObjectHideFlags: 0

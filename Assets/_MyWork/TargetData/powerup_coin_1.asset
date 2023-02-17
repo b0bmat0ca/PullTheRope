@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee66eea4d9a2b384eb99d0c4132de66b, type: 3}
-  m_Name: SM_PolygonPrototype_Prop_Target_03
+  m_Name: powerup_coin_1
   m_EditorClassIdentifier: 
-  _name: SM_PolygonPrototype_Prop_Target_03
-  point: 5
+  _name: powerup_coin_1
+  point: 15
   enableLookAt: 1
   enableHandDestroy: 1
-  enableRigidBody: 0
+  enableRigidBody: 1

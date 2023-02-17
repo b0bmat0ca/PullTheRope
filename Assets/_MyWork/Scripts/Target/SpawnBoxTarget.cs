@@ -11,6 +11,8 @@ public class SpawnBoxTarget : MonoBehaviour
     [SerializeField] private float minSpawnTime = 5;
     [SerializeField] private float maxSpawnTime = 15;
 
+    [SerializeField] private Transform spawnParent;
+
     // ターゲットリスト
     [SerializeField] private List<TargetMap> targetList;
     [System.Serializable]
@@ -33,6 +35,10 @@ public class SpawnBoxTarget : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         model = GameStateManager.Instance.model;
+        if (spawnParent == null)
+        {
+            spawnParent = GameObject.FindGameObjectWithTag("SpawnParent").transform;
+        }
         SpawnTarget().Forget();
     }
 
@@ -56,7 +62,7 @@ public class SpawnBoxTarget : MonoBehaviour
             GameObject obj = Instantiate(target.Target, transform.position + new Vector3(0, target.OffsetY, 0), Quaternion.identity);
             obj.SetActive(false);
             obj.transform.localScale *= target.TargetScale;
-            obj.transform.SetParent(gameObject.transform);
+            obj.transform.SetParent(spawnParent);
             obj.SetActive(true);
             audioSource.Play();
             await UniTask.WaitUntil(() => obj == null, cancellationToken: this.GetCancellationTokenOnDestroy());

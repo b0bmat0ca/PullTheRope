@@ -57,7 +57,7 @@ public class RandomBoxTarget : Target
         }
 
         boxPattern.SetActive(false);
-        GameObject obj = Instantiate(items[Random.Range(0, items.Length - 1)], itemSpaawnPoint.position, Quaternion.identity);
+        GameObject obj = Instantiate(items[Random.Range(0, items.Length)], itemSpaawnPoint.position, Quaternion.identity);
         obj.SetActive(false);
         obj.transform.localScale = transform.localScale;
         obj.transform.SetParent(gameObject.transform.parent);

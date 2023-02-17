@@ -17,6 +17,14 @@ public class EnableDestroyTarget : Target
     #region Target
     protected override async UniTaskVoid DestroyTarget()
     {
+        if (!colider.enabled)
+        {
+            return;
+        }
+
+        // コライダーを無効化する
+        colider.enabled = false;
+
         // 得点追加
         if (model.Time.Value > 0)
         {
@@ -26,9 +34,6 @@ public class EnableDestroyTarget : Target
 
         // 粉砕する
         rayFireRigid.Demolish();
-
-        // コライダーを無効化する
-        colider.enabled = false;
 
         // 粉砕後、{destroyTime}秒後にDestroyする
         foreach (MeshRenderer meshRenderer in meshRenderers)

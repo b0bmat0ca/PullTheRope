@@ -17,6 +17,7 @@ using MText;
 using TMPro;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine.AddressableAssets;
+using UnityEditor;
 
 public class StageRoom : PassthroughRoom
 {
@@ -24,7 +25,8 @@ public class StageRoom : PassthroughRoom
     [Header("HUDテキスト"), SerializeField] private TextMeshProUGUI hudText;
     [Header("制限時間"), SerializeField] private int time = 60;
     [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject scoreDialog;
-    [Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
+    //[Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
+    [Header("ターゲット生成位置"), SerializeField] private Transform spawnParent;
 
     private float currentTime = 0;
     private StageModel model;
@@ -41,6 +43,10 @@ public class StageRoom : PassthroughRoom
 
     [Header("ステージ用アセット")]
     [Header("SkyBox"), SerializeField] private GameObject skyBox;
+
+    private Material skyMaterial;
+    private GameObject bulletPrefab;
+    private AudioClip bulletSE;
 
     #region PassthroughRoom
     public override void  InitializRoom()
@@ -96,6 +102,8 @@ public class StageRoom : PassthroughRoom
 
     public override async UniTask StartRoom(CancellationToken token)
     {
+        // 部屋開始の演出
+
         // 砲塔の初期化
         InitializeCannon();
 
@@ -123,19 +131,23 @@ public class StageRoom : PassthroughRoom
     {
         ParticleSystem toReal = GetParticle("ToReal");
 
-        // ステージ終了の演出
+        // 部屋終了の演出
 
         // ステージエンドタイトル表示
         hudText.text = $"Stage {stageIndex} End";
         hudCanvas.SetActive(true);
-
-        spawnPoint.SetActive(false);
 
         AudioClip end = GetSE("End");
         SEPlay(end);
         await UniTask.Delay(TimeSpan.FromSeconds(end.length), cancellationToken: token);
 
         hudCanvas.SetActive(false);
+
+        // ターゲットの削除
+        foreach (Transform target in spawnParent)
+        {
+            Destroy(target.gameObject);
+        }
 
         await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: token);
         cannonParent.gameObject.SetActive(false);
@@ -156,16 +168,18 @@ public class StageRoom : PassthroughRoom
 
     private void OnDestroy()
     {
-        LoadAsset(1, this.GetCancellationTokenOnDestroy()).Forget();
+        //LoadAsset(1, this.GetCancellationTokenOnDestroy()).Forget();
+        ReleaseAsset(stageIndex);
     }
 
     // Start is called before the first frame update
    async  void Start()
     {
         // ステージ数の読み込み
-        TextAsset pullTheRope = await Addressables.LoadAssetAsync<TextAsset>("StageInfo").Task;
-        StageInfo info = JsonUtility.FromJson<StageInfo>(pullTheRope.ToString());
+        TextAsset stageInfo = await Addressables.LoadAssetAsync<TextAsset>("StageInfo").Task;
+        StageInfo info = JsonUtility.FromJson<StageInfo>(stageInfo.ToString());
         maxStageCount = info.Stage;
+        Addressables.Release(stageInfo);
 
         // 制限時間を購読
         model.Time
@@ -208,21 +222,30 @@ public class StageRoom : PassthroughRoom
         }
     }
 
+    /// <summary>
+    /// 次のステージの呼び出し
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
     private async UniTask NextStage(CancellationToken token)
     {
         roomStart = false;
 
+        ReleaseAsset(stageIndex);
         await LoadAsset(++stageIndex, token);
         await StartRoom(token);
     }
 
+    /// <summary>
+    /// ステージの終了処理
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
     private async UniTask EndStage(CancellationToken token)
     {
         // ステージエンドタイトル表示
         hudText.text = $"Stage {stageIndex} End";
         hudCanvas.SetActive(true);
-
-        spawnPoint.SetActive(false);
 
         AudioClip end = GetSE("End");
         SEPlay(end);
@@ -230,22 +253,34 @@ public class StageRoom : PassthroughRoom
 
         hudCanvas.SetActive(false);
 
+        // ターゲットの削除
+        foreach (Transform target in spawnParent)
+        {
+            Destroy(target.gameObject);
+        }
+
         await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: token);
         cannonParent.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Addressablesでアセットをロード
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
     private async UniTask LoadAsset(int index, CancellationToken token)
     {
         // BGMの処理
         audioSources[0].clip = await Addressables.LoadAssetAsync<AudioClip>($"Stage{index}_BGM").Task;
 
         // SkyBoxの処理
-        Material skyMaterial = await Addressables.LoadAssetAsync<Material>($"Stage{index}_SkyBox").Task;
+        skyMaterial = await Addressables.LoadAssetAsync<Material>($"Stage{index}_SkyBox").Task;
         skyBox.GetComponent<MeshRenderer>().material = skyMaterial;
 
         // 弾倉の処理
-        GameObject bulletPrefab = await Addressables.LoadAssetAsync<GameObject>($"Stage{index}_Bullet").Task;
-        AudioClip bulletSE = await Addressables.LoadAssetAsync<AudioClip>($"Stage{index}_Bullet_SE").Task;
+        bulletPrefab = await Addressables.LoadAssetAsync<GameObject>($"Stage{index}_Bullet").Task;
+        bulletSE = await Addressables.LoadAssetAsync<AudioClip>($"Stage{index}_Bullet_SE").Task;
         magazineCartridge.ResetBullet(bulletPrefab);
         magazineCartridge.GetComponent<AudioSource>().clip = bulletSE;
 
@@ -261,5 +296,22 @@ public class StageRoom : PassthroughRoom
             groundMeshFilter[i].mesh = groundMesh[i];
         }
         */
+    }
+
+    /// <summary>
+    /// Addressablesでロードしたアセットをリリース
+    /// </summary>
+    /// <param name="index"></param>
+    private void ReleaseAsset(int index)
+    {
+        // BGMの処理
+        Addressables.Release(audioSources[0].clip);
+
+        // SkyBoxの処理
+        Addressables.Release(skyMaterial);
+
+        // 弾倉の処理
+        Addressables.Release(bulletPrefab);
+        Addressables.Release(bulletSE);
     }
 }

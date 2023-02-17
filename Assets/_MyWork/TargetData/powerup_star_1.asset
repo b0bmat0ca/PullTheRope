@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: powerup_star_1
   m_EditorClassIdentifier: 
   _name: powerup_star_1
-  point: 15
+  point: 20
   enableLookAt: 1
+  enableHandDestroy: 1
   enableRigidBody: 1

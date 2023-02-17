@@ -7,6 +7,7 @@ using UniRx;
 using UnityEngine;
 using System;
 using DamageNumbersPro;
+using DG.Tweening;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class Target : MonoBehaviour
@@ -70,6 +71,7 @@ public abstract class Target : MonoBehaviour
     protected string _name;
     protected int point;
     protected bool enableLookAt;
+    protected bool enableHandDestroy;
     protected bool enableRigidBody;
 
     protected StageModel model;
@@ -90,6 +92,7 @@ public abstract class Target : MonoBehaviour
         _name = targetData.Name;
         point = targetData.Point;
         enableLookAt = targetData.EnableLookAt;
+        enableHandDestroy = targetData.EnableHandDestroy;
         enableRigidBody = targetData.EnableRigidBody;
         audioSource = GetComponent<AudioSource>();
     }
@@ -108,7 +111,7 @@ public abstract class Target : MonoBehaviour
     {
         if (enableLookAt)
         {
-            transform.LookAt(mainCamera.transform);
+            transform.LookAt(new Vector3(mainCamera.transform.position.x, transform.position.y, mainCamera.transform.position.z));
         }
     }
 

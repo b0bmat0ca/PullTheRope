@@ -214,6 +214,7 @@ MonoBehaviour:
   boxPattern: {fileID: 817607010770868199}
   itemSpaawnPoint: {fileID: 430364524144074152}
   items:
+  - {fileID: 1916903738237987236, guid: f31701c58dce6f046a9248fecf8bd5f5, type: 3}
   - {fileID: 3186157548710712310, guid: 6af6a87bcf3d4074e8a743292443275f, type: 3}
 --- !u!1 &817607010770868199
 GameObject:

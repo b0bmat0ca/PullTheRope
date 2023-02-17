@@ -15,6 +15,9 @@ public class TargetData : ScriptableObject
     public bool EnableLookAt => enableLookAt;
     [Header("プレイヤーの方向を常に向く"), SerializeField] private bool enableLookAt;
 
+    public bool EnableHandDestroy => enableHandDestroy;
+    [Header("手で壊せる"), SerializeField] private bool enableHandDestroy;
+
     public bool EnableRigidBody => enableRigidBody;
     [Header("RigidBodyが付与されたターゲット"), SerializeField] private bool enableRigidBody;
 }
