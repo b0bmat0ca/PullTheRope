@@ -90,8 +90,6 @@ public class GameStateManager : MonoBehaviour
         await UniTask.WaitUntil(() => 
         player.position != Vector3.zero && CommonUtility.Instance != null, cancellationToken: this.GetCancellationTokenOnDestroy());
 
-        //CommonUtility.Instance.ExitExplicitFade();
-
         // ルームの開始
         currentRoom = roomList[CurrentRoomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
@@ -150,14 +148,11 @@ public class GameStateManager : MonoBehaviour
 
     private async UniTask NextRoom()
     {
-        if (roomList[++CurrentRoomIndex].ResetRoom)
-        {
-            await CommonUtility.Instance.FadeOut(this.GetCancellationTokenOnDestroy());
-            currentRoom.gameObject.SetActive(false);
-        }
-        
+        await CommonUtility.Instance.FadeOut(this.GetCancellationTokenOnDestroy());
+        currentRoom.gameObject.SetActive(false);
+
         // 次の部屋の設定
-        currentRoom = roomList[CurrentRoomIndex].Instance;
+        currentRoom = roomList[++CurrentRoomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
         currentRoom.OnInitializeAsync
             .Subscribe(async _ => 

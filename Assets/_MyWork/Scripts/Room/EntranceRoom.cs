@@ -16,6 +16,8 @@ using UnityEngine.UI;
 using System.Threading;
 using DamageNumbersPro;
 using Unity.VisualScripting.Antlr3.Runtime;
+using UniRx.Triggers;
+using Oculus.Interaction;
 
 public class EntranceRoom : PassthroughRoom
 {
@@ -56,7 +58,7 @@ public class EntranceRoom : PassthroughRoom
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.DoorFrame))
                 {
-                    SetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame, sceneAnchor);
+                    SetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame, sceneAnchor, false);
                 }
                 else if (classification.Contains(OVRSceneManager.Classification.WallFace))
                 {
@@ -184,7 +186,7 @@ public class EntranceRoom : PassthroughRoom
                 leftPinch = true;
                 if (rightPinch)
                 {
-                    EnableRandomBox(GetPlayerForwardPosition(0.8f, 1.6f), Quaternion.identity).Forget();
+                    EnableDoorFrame();
                 }
             }).AddTo(this);
 
@@ -195,14 +197,20 @@ public class EntranceRoom : PassthroughRoom
                 rightPinch = true;
                 if (leftPinch)
                 {
-                    EnableRandomBox(GetPlayerForwardPosition(0.8f, 1.6f), Quaternion.identity).Forget();
+                    EnableDoorFrame();
                 }
             }).AddTo(this);
 
         // ランダムボックスをパンチしたイベントを購読
         onPunchRandomBoxAsyncSubject
-            .Subscribe(async _ => await DisablePassthrough())
-            .AddTo(this);
+            .Subscribe(_ =>
+            {
+                // 砲塔の初期化
+                InitializeCannon(false);
+
+                // ランダムボックスの破壊
+                randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
+            }).AddTo(this);
 
         // 初めてトリガーを握ったイベントを購読
         inputEventProvider.IsTriggerGrab
@@ -258,12 +266,8 @@ public class EntranceRoom : PassthroughRoom
 #endif
     }
 
-    private async UniTaskVoid EnableRandomBox(Vector3 position, Quaternion rotation)
+    private void EnableRandomBox(Vector3 position, Quaternion rotation)
     {
-        guideDialog.SetActive(false);
-
-        await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: this.GetCancellationTokenOnDestroy());
-
         randomBox.transform.SetPositionAndRotation(position, rotation);
         randomBox.SetActive(true);
     }
@@ -286,6 +290,26 @@ public class EntranceRoom : PassthroughRoom
         target.transform.DOMove(cannon.transform.position + cannon.transform.forward * 3, 1f).SetEase(Ease.InOutSine);
     }
 
+
+    /// <summary>
+    /// Virtual世界へのドアを表示
+    /// </summary>
+    private void EnableDoorFrame()
+    {
+        guideDialog.SetActive(false);
+        List<OVRSceneAnchor> doorFrames = GetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame).anchors;
+
+        foreach (OVRSceneAnchor doorFrame in doorFrames)
+        {
+            doorFrame.gameObject.SetActive(true);
+            doorFrame.gameObject.transform.Find("DepthOccluder").GetComponent<BoxCollider>().OnTriggerEnterAsObservable()
+                .Where(others => others.name.StartsWith("Hand"))
+                .First()
+                .Subscribe(async _ => await DisablePassthrough())
+                .AddTo(this);
+        }
+    }
+
     /// <summary>
     /// パススルー表示を終了
     /// </summary>
@@ -293,9 +317,6 @@ public class EntranceRoom : PassthroughRoom
     private async UniTask DisablePassthrough()
     {
         ParticleSystem toVirtual = GetParticle("ToVirtual");
-
-        randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
-        await UniTask.WaitUntil(() => randomBox == null, cancellationToken: this.GetCancellationTokenOnDestroy());
 
         CommonUtility.Instance.FadeOut();   // 現実世界で徐々にフェードアウトさせるとVR世界が写り込むため、即時フェードアウトさせる
 
@@ -315,16 +336,18 @@ public class EntranceRoom : PassthroughRoom
             }
         }
 
-        Vector3 titleTextPosition = new Vector3(player.forward.x, 0, player.forward.z).normalized
+        // タイトルをプレイヤーの後ろ方向に表示する
+        Vector3 titleTextPosition = new Vector3(-player.forward.x, 0, -player.forward.z).normalized
             * titleDistance + new Vector3(0, titleText.transform.position.y, 0);
         titleText.transform.position = titleTextPosition;
         titleText.transform.LookAt(new Vector3(player.position.x, titleText.transform.position.y, player.position.z));
         titleText.SetActive(true);
 
-        // 砲塔の初期化
-        InitializeCannon(false);
         toVirtual.gameObject.transform.position = new Vector3(player.position.x, 0, player.position.z);
         toVirtual.gameObject.SetActive(true);
+
+        // ランダムボックスをプレイヤーの後ろ方向に表示する
+        EnableRandomBox(GetPlayerForwardPosition(-1.5f, 1.6f), Quaternion.identity);
         await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
         await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: this.GetCancellationTokenOnDestroy());
         BGMPlay();

@@ -18,6 +18,8 @@ using TMPro;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine.AddressableAssets;
 using UnityEditor;
+using UniRx.Triggers;
+using DG.Tweening;
 
 public class StageRoom : PassthroughRoom
 {
@@ -25,8 +27,9 @@ public class StageRoom : PassthroughRoom
     [Header("HUDテキスト"), SerializeField] private TextMeshProUGUI hudText;
     [Header("制限時間"), SerializeField] private int time = 60;
     [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject scoreDialog;
-    //[Header("ターゲット生成位置"), SerializeField] private GameObject spawnPoint;
     [Header("ターゲット生成位置"), SerializeField] private Transform spawnParent;
+
+    [Header("パススルー表示用マテリアル"), SerializeField] private Material passthroughMaterial;
 
     private float currentTime = 0;
     private StageModel model;
@@ -112,7 +115,6 @@ public class StageRoom : PassthroughRoom
         // ステージタイトル表示
         hudText.text = $"Stage {stageIndex}";
         hudCanvas.SetActive(true);
-        
 
         // 制限時間を設定
         model.Time.Value = this.time;
@@ -129,31 +131,14 @@ public class StageRoom : PassthroughRoom
 
     public override async UniTask<bool> EndRoom(CancellationToken token)
     {
-        ParticleSystem toReal = GetParticle("ToReal");
-
         // 部屋終了の演出
-
-        // ステージエンドタイトル表示
-        hudText.text = $"Stage {stageIndex} End";
-        hudCanvas.SetActive(true);
-
-        AudioClip end = GetSE("End");
-        SEPlay(end);
-        await UniTask.Delay(TimeSpan.FromSeconds(end.length), cancellationToken: token);
-
-        hudCanvas.SetActive(false);
-
-        // ターゲットの削除
-        foreach (Transform target in spawnParent)
-        {
-            Destroy(target.gameObject);
-        }
-
-        await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: token);
+        
+        // 砲台を非表示
         cannonParent.gameObject.SetActive(false);
 
+        ParticleSystem toReal = GetParticle("ToReal");
         toReal.gameObject.SetActive(true);
-        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
+        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: this.GetCancellationTokenOnDestroy());
 
         return true;
     }
@@ -191,8 +176,23 @@ public class StageRoom : PassthroughRoom
 
                 if (maxStageCount == stageIndex)
                 {
-                    onClearAsyncSubject.OnNext(true);
-                    onClearAsyncSubject.OnCompleted();
+                    // ステージエンドタイトル表示
+                    hudText.text = $"Stage {stageIndex} End";
+                    hudCanvas.SetActive(true);
+
+                    AudioClip end = GetSE("End");
+                    SEPlay(end);
+                    await UniTask.Delay(TimeSpan.FromSeconds(end.length), cancellationToken: this.GetCancellationTokenOnDestroy());
+
+                    hudCanvas.SetActive(false);
+
+                    // ターゲットの削除
+                    foreach (Transform target in spawnParent)
+                    {
+                        Destroy(target.gameObject);
+                    }
+
+                    EnableDoorFrame();
                 }
                 else
                 {
@@ -219,6 +219,28 @@ public class StageRoom : PassthroughRoom
                 }
                 currentTime -= 1;
             }
+        }
+    }
+
+    /// <summary>
+    /// 現実世界へのドアを表示
+    /// </summary>
+    private void EnableDoorFrame()
+    {
+        List<OVRSceneAnchor> doorFrames = GetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame).anchors;
+        foreach (OVRSceneAnchor doorFrame in doorFrames)
+        {
+            Transform depthOccluder = doorFrame.gameObject.transform.Find("DepthOccluder");
+            depthOccluder.GetComponent<MeshRenderer>().material = passthroughMaterial;
+            depthOccluder.GetComponent<BoxCollider>().OnTriggerEnterAsObservable()
+                .Where(others => others.name.StartsWith("Hand"))
+                .First()
+                .Subscribe(_ =>
+                {
+                    onClearAsyncSubject.OnNext(true);
+                    onClearAsyncSubject.OnCompleted();
+                }).AddTo(this);
+            doorFrame.gameObject.SetActive(true);
         }
     }
 
