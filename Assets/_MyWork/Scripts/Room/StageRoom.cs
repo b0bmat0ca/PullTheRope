@@ -132,13 +132,11 @@ public class StageRoom : PassthroughRoom
     public override async UniTask<bool> EndRoom(CancellationToken token)
     {
         // 部屋終了の演出
-        
-        // 砲台を非表示
-        cannonParent.gameObject.SetActive(false);
-
         ParticleSystem toReal = GetParticle("ToReal");
+
+        toReal.gameObject.transform.position = new Vector3(player.position.x, 0, player.position.z);
         toReal.gameObject.SetActive(true);
-        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
 
         return true;
     }
@@ -158,7 +156,7 @@ public class StageRoom : PassthroughRoom
     }
 
     // Start is called before the first frame update
-   async  void Start()
+   async void Start()
     {
         // ステージ数の読み込み
         TextAsset stageInfo = await Addressables.LoadAssetAsync<TextAsset>("StageInfo").Task;
@@ -176,13 +174,14 @@ public class StageRoom : PassthroughRoom
 
                 if (maxStageCount == stageIndex)
                 {
+                    CancellationToken token = this.GetCancellationTokenOnDestroy();
                     // ステージエンドタイトル表示
                     hudText.text = $"Stage {stageIndex} End";
                     hudCanvas.SetActive(true);
 
                     AudioClip end = GetSE("End");
                     SEPlay(end);
-                    await UniTask.Delay(TimeSpan.FromSeconds(end.length), cancellationToken: this.GetCancellationTokenOnDestroy());
+                    await UniTask.Delay(TimeSpan.FromSeconds(end.length), cancellationToken: token);
 
                     hudCanvas.SetActive(false);
 
@@ -191,6 +190,17 @@ public class StageRoom : PassthroughRoom
                     {
                         Destroy(target.gameObject);
                     }
+
+                    await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
+
+                    // ターゲットの削除(念のため)
+                    foreach (Transform target in spawnParent)
+                    {
+                        Destroy(target.gameObject);
+                    }
+
+                    // 砲台を非表示
+                    cannonParent.gameObject.SetActive(false);
 
                     EnableDoorFrame();
                 }
@@ -230,17 +240,20 @@ public class StageRoom : PassthroughRoom
         List<OVRSceneAnchor> doorFrames = GetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame).anchors;
         foreach (OVRSceneAnchor doorFrame in doorFrames)
         {
-            Transform depthOccluder = doorFrame.gameObject.transform.Find("DepthOccluder");
-            depthOccluder.GetComponent<MeshRenderer>().material = passthroughMaterial;
-            depthOccluder.GetComponent<BoxCollider>().OnTriggerEnterAsObservable()
-                .Where(others => others.name.StartsWith("Hand"))
-                .First()
-                .Subscribe(_ =>
+            doorFrame.gameObject.SetActive(true);
+
+            VirtualDoorMove doorMove = doorFrame.GetComponent<VirtualDoorMove>();
+            doorMove.depthOccluder.material = passthroughMaterial;  // 現実世界表示用マテリアル
+            doorMove.OnDoorOpen
+                .Where(x => x)
+                .Subscribe(async _ =>
                 {
+                    CancellationToken token = this.GetCancellationTokenOnDestroy();
+                    await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
+
                     onClearAsyncSubject.OnNext(true);
                     onClearAsyncSubject.OnCompleted();
                 }).AddTo(this);
-            doorFrame.gameObject.SetActive(true);
         }
     }
 
@@ -281,7 +294,14 @@ public class StageRoom : PassthroughRoom
             Destroy(target.gameObject);
         }
 
-        await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: token);
+        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
+
+        // ターゲットの削除(念のため)
+        foreach (Transform target in spawnParent)
+        {
+            Destroy(target.gameObject);
+        }
+
         cannonParent.gameObject.SetActive(false);
     }
 

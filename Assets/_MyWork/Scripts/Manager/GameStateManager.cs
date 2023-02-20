@@ -148,7 +148,15 @@ public class GameStateManager : MonoBehaviour
 
     private async UniTask NextRoom()
     {
-        await CommonUtility.Instance.FadeOut(this.GetCancellationTokenOnDestroy());
+        CancellationToken token = this.GetCancellationTokenOnDestroy();
+        if (roomList[CurrentRoomIndex].ResetRoom)
+        {
+            CommonUtility.Instance.FadeOut();
+        }
+        else
+        {
+            await CommonUtility.Instance.FadeOut(token);
+        }
         currentRoom.gameObject.SetActive(false);
 
         // 次の部屋の設定

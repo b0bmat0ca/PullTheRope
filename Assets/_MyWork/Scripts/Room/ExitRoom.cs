@@ -37,7 +37,7 @@ public class ExitRoom : PassthroughRoom
 
     public override async UniTask<bool> EndRoom(CancellationToken token)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: token);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: token);
 
         return false;
     }
@@ -67,6 +67,27 @@ public class ExitRoom : PassthroughRoom
             foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
             {
                 sceneAnchor.gameObject.SetActive(!sceneAnchor.gameObject.activeSelf);
+            }
+        }
+
+        foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
+        {
+            if (sceneAnchorClassification.classification == OVRSceneManager.Classification.Couch ||
+                sceneAnchorClassification.classification == OVRSceneManager.Classification.Desk ||
+                sceneAnchorClassification.classification == OVRSceneManager.Classification.Other ||
+                sceneAnchorClassification.classification == OVRSceneManager.Classification.DoorFrame)
+            {
+                foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
+                {
+                    sceneAnchor.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
+                {
+                    sceneAnchor.gameObject.SetActive(true);    // 現実世界を見えるようにする
+                }
             }
         }
 

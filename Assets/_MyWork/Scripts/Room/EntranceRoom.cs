@@ -21,18 +21,21 @@ using Oculus.Interaction;
 
 public class EntranceRoom : PassthroughRoom
 {
+    [SerializeField] private InputEventProviderGrabbable inputEventProvider;
+
+    [SerializeField] private GameObject stageGround;
+    [SerializeField] private GameObject skySphere;
+
     [SerializeField] private GameObject titleText;
     [SerializeField] private float titleDistance = 10f;
     [SerializeField] private EnableDestroyTarget target;
-
-    [SerializeField] private GameObject randomBox;
-
-    [SerializeField] private InputEventProviderGrabbable inputEventProvider;
 
     [SerializeField] private GameObject guideDialog;
     [SerializeField] private VideoPlayer videoPlayer;
     private bool leftPinch = false;
     private bool rightPinch = false;
+
+    [SerializeField] private GameObject randomBox;
 
     [SerializeField] private DamageNumber okTextPrefab;
     private bool triggerGrabbed = false;
@@ -107,6 +110,10 @@ public class EntranceRoom : PassthroughRoom
             }
         }
         CullForegroundObjects();
+
+        // Levelの非表示
+        stageGround.SetActive(false);
+        skySphere.SetActive(false);
 
         // 砲塔の取得
         cannon = cannonParent.GetComponentInChildren<CannonMultiMove>(true).gameObject;
@@ -302,11 +309,19 @@ public class EntranceRoom : PassthroughRoom
         foreach (OVRSceneAnchor doorFrame in doorFrames)
         {
             doorFrame.gameObject.SetActive(true);
-            doorFrame.gameObject.transform.Find("DepthOccluder").GetComponent<BoxCollider>().OnTriggerEnterAsObservable()
-                .Where(others => others.name.StartsWith("Hand"))
-                .First()
-                .Subscribe(async _ => await DisablePassthrough())
-                .AddTo(this);
+            doorFrame.GetComponent<VirtualDoorMove>().OnDoorOpen
+                .Where(x => x)
+                .Subscribe(async _ =>
+                {
+                    // Levelの表示
+                    stageGround.SetActive(true);
+                    skySphere.SetActive(true);
+
+                    CancellationToken token = this.GetCancellationTokenOnDestroy();
+                    await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
+                    await DisablePassthrough(token);
+                    doorFrame.gameObject.SetActive(false);
+                }).AddTo(this);
         }
     }
 
@@ -314,7 +329,7 @@ public class EntranceRoom : PassthroughRoom
     /// パススルー表示を終了
     /// </summary>
     /// <returns></returns>
-    private async UniTask DisablePassthrough()
+    private async UniTask DisablePassthrough(CancellationToken token)
     {
         ParticleSystem toVirtual = GetParticle("ToVirtual");
 
@@ -347,9 +362,9 @@ public class EntranceRoom : PassthroughRoom
         toVirtual.gameObject.SetActive(true);
 
         // ランダムボックスをプレイヤーの後ろ方向に表示する
-        EnableRandomBox(GetPlayerForwardPosition(-1.5f, 1.6f), Quaternion.identity);
+        EnableRandomBox(GetPlayerForwardPosition(-1f, 1.6f), Quaternion.identity);
         await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
-        await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: this.GetCancellationTokenOnDestroy());
+        await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: token);
         BGMPlay();
     }
 }
