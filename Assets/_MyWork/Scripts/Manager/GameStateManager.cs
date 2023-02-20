@@ -96,7 +96,7 @@ public class GameStateManager : MonoBehaviour
         currentRoom.OnInitializeAsync
             .Subscribe(async _ =>
             {
-                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
+                await currentRoom.StartRoom();
 
                 // 開始状態に設定
                 gameState.Value = GameState.Start;
@@ -133,7 +133,7 @@ public class GameStateManager : MonoBehaviour
         }
         else if (gameState.Value == GameState.End)
         {
-            bool next = await currentRoom.EndRoom(this.GetCancellationTokenOnDestroy());
+            bool next = await currentRoom.EndRoom();
 
             if (next)
             {
@@ -165,7 +165,7 @@ public class GameStateManager : MonoBehaviour
         currentRoom.OnInitializeAsync
             .Subscribe(async _ => 
             {
-                await currentRoom.StartRoom(this.GetCancellationTokenOnDestroy());
+                await currentRoom.StartRoom();
 
                 // 開始状態に設定
                 gameState.Value = GameState.Start;

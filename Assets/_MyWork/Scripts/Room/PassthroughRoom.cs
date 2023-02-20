@@ -19,6 +19,8 @@ public abstract class PassthroughRoom : MonoBehaviour
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
 
+    protected CancellationTokenSource tokenSource = new();
+
     [Header("弾倉"), SerializeField] protected MagazineCartridgeController magazineCartridge;
 
     // パーティクルリスト
@@ -138,6 +140,21 @@ public abstract class PassthroughRoom : MonoBehaviour
         onClearAsyncSubject.AddTo(this);
         envRoot = this.transform;
         audioSources = GetComponents<AudioSource>();
+    }
+
+    private void OnEnable()
+    {
+        tokenSource = new();
+    }
+
+    protected virtual void OnDisable()
+    {
+        tokenSource.Cancel();
+    }
+
+    protected virtual void OnDestroy()
+    {
+        tokenSource.Cancel();
     }
 
     /// <summary>
@@ -300,14 +317,10 @@ public abstract class PassthroughRoom : MonoBehaviour
     /// <summary>
     /// 部屋の開始
     /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    public abstract UniTask StartRoom(CancellationToken token);
+    public abstract UniTask StartRoom();
 
     /// <summary>
     /// 部屋の終了
     /// </summary>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    public abstract UniTask<bool> EndRoom(CancellationToken token);
+    public abstract UniTask<bool> EndRoom();
 }

@@ -103,8 +103,9 @@ public class StageRoom : PassthroughRoom
         onInitializeAsyncSubject.OnCompleted();
     }
 
-    public override async UniTask StartRoom(CancellationToken token)
+    public override async UniTask StartRoom()
     {
+        CancellationToken token = tokenSource.Token;
         // 部屋開始の演出
 
         // 砲塔の初期化
@@ -129,14 +130,14 @@ public class StageRoom : PassthroughRoom
         roomStart = true;
     }
 
-    public override async UniTask<bool> EndRoom(CancellationToken token)
+    public override async UniTask<bool> EndRoom()
     {
         // 部屋終了の演出
         ParticleSystem toReal = GetParticle("ToReal");
 
         toReal.gameObject.transform.position = new Vector3(player.position.x, 0, player.position.z);
         toReal.gameObject.SetActive(true);
-        await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
+        await UniTask.Delay(TimeSpan.FromSeconds(5), cancellationToken: tokenSource.Token);
 
         return true;
     }
@@ -149,8 +150,10 @@ public class StageRoom : PassthroughRoom
         hudCanvas.SetActive(false);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+
         //LoadAsset(1, this.GetCancellationTokenOnDestroy()).Forget();
         ReleaseAsset(stageIndex);
     }
@@ -170,11 +173,12 @@ public class StageRoom : PassthroughRoom
             .Where(x => x == 0)
             .Subscribe(async  _=>
             {
+                CancellationToken token = tokenSource.Token;
+
                 BGMPlay(true);
 
                 if (maxStageCount == stageIndex)
                 {
-                    CancellationToken token = this.GetCancellationTokenOnDestroy();
                     // ステージエンドタイトル表示
                     hudText.text = $"Stage {stageIndex} End";
                     hudCanvas.SetActive(true);
@@ -202,11 +206,10 @@ public class StageRoom : PassthroughRoom
                     // 砲台を非表示
                     cannonParent.gameObject.SetActive(false);
 
-                    EnableDoorFrame();
+                    await EnableDoorFrame();
                 }
                 else
                 {
-                    CancellationToken token = this.GetCancellationTokenOnDestroy();
                     await EndStage(token);
                     await CommonUtility.Instance.FadeOut(token);
                     await NextStage(token);
@@ -235,9 +238,11 @@ public class StageRoom : PassthroughRoom
     /// <summary>
     /// 現実世界へのドアを表示
     /// </summary>
-    private void EnableDoorFrame()
+    private async UniTask EnableDoorFrame()
     {
+        AudioClip endStage = GetSE("EndStage");
         List<OVRSceneAnchor> doorFrames = GetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame).anchors;
+        
         foreach (OVRSceneAnchor doorFrame in doorFrames)
         {
             doorFrame.gameObject.SetActive(true);
@@ -248,13 +253,17 @@ public class StageRoom : PassthroughRoom
                 .Where(x => x)
                 .Subscribe(async _ =>
                 {
-                    CancellationToken token = this.GetCancellationTokenOnDestroy();
-                    await UniTask.Delay(TimeSpan.FromSeconds(2), cancellationToken: token);
+                    await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: tokenSource.Token);
 
                     onClearAsyncSubject.OnNext(true);
                     onClearAsyncSubject.OnCompleted();
                 }).AddTo(this);
         }
+
+        // 案内音声再生
+        SEPlay(endStage);
+        await UniTask.Delay(TimeSpan.FromSeconds(endStage.length), cancellationToken: tokenSource.Token);
+        SEPlay(GetSE("GotoReal"));
     }
 
     /// <summary>
@@ -268,7 +277,7 @@ public class StageRoom : PassthroughRoom
 
         ReleaseAsset(stageIndex);
         await LoadAsset(++stageIndex, token);
-        await StartRoom(token);
+        await StartRoom();
     }
 
     /// <summary>

@@ -18,6 +18,8 @@ using DamageNumbersPro;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UniRx.Triggers;
 using Oculus.Interaction;
+using TMPro;
+using Cysharp.Threading.Tasks.CompilerServices;
 
 public class EntranceRoom : PassthroughRoom
 {
@@ -123,8 +125,10 @@ public class EntranceRoom : PassthroughRoom
         onInitializeAsyncSubject.OnCompleted();
     }
 
-    public override async UniTask StartRoom(CancellationToken token)
+    public override async UniTask StartRoom()
     {
+        CancellationToken token = tokenSource.Token;
+
         // 動画の再生開始を待つ
         await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: token);
 
@@ -139,10 +143,10 @@ public class EntranceRoom : PassthroughRoom
     }
 
 
-    public override async UniTask<bool> EndRoom(CancellationToken token)
+    public override async UniTask<bool> EndRoom()
     {
         // ターゲットオブジェクトが削除されたタイミング
-        await UniTask.WaitUntil(() => target == null, cancellationToken: token);
+        await UniTask.WaitUntil(() => target == null, cancellationToken: tokenSource.Token);
 
         return true;
     }
@@ -188,23 +192,23 @@ public class EntranceRoom : PassthroughRoom
 
         // 左手の掴むポーズイベントを購読
         checkPinch.OnLeftCheckAsync
-            .Subscribe(_ =>
+            .Subscribe(async _ =>
             {
                 leftPinch = true;
                 if (rightPinch)
                 {
-                    EnableDoorFrame();
+                    await EnableDoorFrame();
                 }
             }).AddTo(this);
 
         // 右手の掴むポーズイベントを購読
         checkPinch.OnRightCheckAsync
-            .Subscribe(_ =>
+            .Subscribe(async _ =>
             {
                 rightPinch = true;
                 if (leftPinch)
                 {
-                    EnableDoorFrame();
+                    await EnableDoorFrame();
                 }
             }).AddTo(this);
 
@@ -301,10 +305,12 @@ public class EntranceRoom : PassthroughRoom
     /// <summary>
     /// Virtual世界へのドアを表示
     /// </summary>
-    private void EnableDoorFrame()
+    private async UniTask EnableDoorFrame()
     {
-        guideDialog.SetActive(false);
+        AudioClip orderComming = GetSE("OrderComming");
         List<OVRSceneAnchor> doorFrames = GetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame).anchors;
+
+        guideDialog.SetActive(false);
 
         foreach (OVRSceneAnchor doorFrame in doorFrames)
         {
@@ -313,16 +319,21 @@ public class EntranceRoom : PassthroughRoom
                 .Where(x => x)
                 .Subscribe(async _ =>
                 {
+                    CancellationToken token = tokenSource.Token;
                     // Levelの表示
                     stageGround.SetActive(true);
                     skySphere.SetActive(true);
 
-                    CancellationToken token = this.GetCancellationTokenOnDestroy();
                     await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
                     await DisablePassthrough(token);
                     doorFrame.gameObject.SetActive(false);
                 }).AddTo(this);
         }
+
+        // 案内音声再生
+        SEPlay(orderComming);
+        await UniTask.Delay(TimeSpan.FromSeconds(orderComming.length), cancellationToken: tokenSource.Token);
+        SEPlay(GetSE("GotoStage"));
     }
 
     /// <summary>

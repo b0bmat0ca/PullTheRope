@@ -26,18 +26,18 @@ public class ExitRoom : PassthroughRoom
         onInitializeAsyncSubject.OnCompleted();
     }
 
-    public override async UniTask StartRoom(CancellationToken token)
+    public override async UniTask StartRoom()
     {
-        await UniTask.WaitUntil(() => rankingLoaded, cancellationToken: token);
+        await UniTask.WaitUntil(() => rankingLoaded, cancellationToken: tokenSource.Token);
         await EnablePassthrough();
 
-        rankingDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
-            Quaternion.Euler(new(rankingDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
+        rankingDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(-1f, 1f),
+            Quaternion.Euler(new(rankingDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y + 180, 0)));
     }
 
-    public override async UniTask<bool> EndRoom(CancellationToken token)
+    public override async UniTask<bool> EndRoom()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: token);
+        await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: tokenSource.Token);
 
         return false;
     }
@@ -64,14 +64,6 @@ public class ExitRoom : PassthroughRoom
     {
         foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
         {
-            foreach (OVRSceneAnchor sceneAnchor in sceneAnchorClassification.anchors)
-            {
-                sceneAnchor.gameObject.SetActive(!sceneAnchor.gameObject.activeSelf);
-            }
-        }
-
-        foreach (SceneAnchorClassification sceneAnchorClassification in sceneAnchorClassifications)
-        {
             if (sceneAnchorClassification.classification == OVRSceneManager.Classification.Couch ||
                 sceneAnchorClassification.classification == OVRSceneManager.Classification.Desk ||
                 sceneAnchorClassification.classification == OVRSceneManager.Classification.Other ||
@@ -91,6 +83,6 @@ public class ExitRoom : PassthroughRoom
             }
         }
 
-        await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
+        await CommonUtility.Instance.FadeIn(tokenSource.Token);
     }
 }
