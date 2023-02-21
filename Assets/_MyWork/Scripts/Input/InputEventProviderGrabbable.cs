@@ -17,11 +17,13 @@ public class InputEventProviderGrabbable : MonoBehaviour, IInputEventProvider
     {
         get
         {
-            if (leftHandInteractor.Interactable)
+            if (leftHandInteractor.Interactable
+                && leftHandInteractor.Interactable.transform.parent.gameObject.name == "Turret")
             {
                 return TurretGrabbedHand.Left;
             }
-            else if (rightHandInteractor.Interactable)
+            else if (rightHandInteractor.Interactable
+                && rightHandInteractor.Interactable.transform.parent.gameObject.name == "Turret")
             {
                 return TurretGrabbedHand.Right;
             }
