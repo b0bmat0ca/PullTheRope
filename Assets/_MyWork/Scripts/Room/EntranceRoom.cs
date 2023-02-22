@@ -25,21 +25,24 @@ public class EntranceRoom : PassthroughRoom
 {
     [SerializeField] private InputEventProviderGrabbable inputEventProvider;
 
-    [SerializeField] private GameObject stageGround;
-    [SerializeField] private GameObject skySphere;
+    [Header("地面"), SerializeField] private GameObject stageGround;
+    [Header("スカイボックス"), SerializeField] private GameObject skySphere;
 
-    [SerializeField] private GameObject titleText;
+    [Header("タイトル"), SerializeField] private GameObject titleText;
     [SerializeField] private float titleDistance = 10f;
     [SerializeField] private EnableDestroyTarget target;
 
-    [SerializeField] private GameObject guideDialog;
+    [Header("案内柱"), SerializeField] private GameObject information;
     [SerializeField] private VideoPlayer videoPlayer;
+    [SerializeField] private CheckPinch checkPinch;
     private bool leftPinch = false;
     private bool rightPinch = false;
 
-    [SerializeField] private GameObject randomBox;
+    [Header("はてなボックス"), SerializeField] private GameObject randomBox;
 
-    [SerializeField] private DamageNumber okTextPrefab;
+    [Header("操作説明柱"), SerializeField] private GameObject howTo;
+
+    [Header("OK演出"), SerializeField] private DamageNumber okTextPrefab;
     private bool triggerGrabbed = false;
     private bool turretGrabbed = false;
 
@@ -132,8 +135,8 @@ public class EntranceRoom : PassthroughRoom
         // 動画の再生開始を待つ
         await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: token);
 
-        guideDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(0.8f, 1f),
-            Quaternion.Euler(new(guideDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y, 0)));
+        information.transform.SetPositionAndRotation(GetPlayerForwardPosition(1.5f, 0),
+            Quaternion.Euler(new(0, player.eulerAngles.y, 0)));
 
         // 初期化状況の調整時間
         await UniTask.Delay(TimeSpan.FromSeconds(2),cancellationToken: token);
@@ -141,7 +144,6 @@ public class EntranceRoom : PassthroughRoom
         // 初期フェードを切る
         CommonUtility.Instance.ExitExplicitFade();
     }
-
 
     public override async UniTask<bool> EndRoom()
     {
@@ -152,26 +154,6 @@ public class EntranceRoom : PassthroughRoom
     }
     #endregion
 
-    /// <summary>
-    /// OVRSceneAnchorオブジェクトを保持し、初期表示設定を行う
-    /// </summary>
-    /// <param name="classificationName"></param>
-    /// <param name="sceneAnchor"></param>
-    /// <param name="activeself"></param>
-    private void SetSceneAnchorClassification(string classificationName, OVRSceneAnchor sceneAnchor, bool activeself = true)
-    {
-        SceneAnchorClassification sceneAnchorClassification;
-
-        sceneAnchorClassification = GetSceneAnchorClassification(classificationName);
-        if (sceneAnchorClassification == null)
-        {
-            sceneAnchorClassification = new(classificationName, new());
-            sceneAnchorClassifications.Add(sceneAnchorClassification);
-        }
-        sceneAnchorClassification.anchors.Add(sceneAnchor);
-        
-        sceneAnchor.gameObject.SetActive(activeself);   // 初期表示設定
-    }
 
     protected override void Awake()
     {
@@ -185,11 +167,17 @@ public class EntranceRoom : PassthroughRoom
         titleText.SetActive(false);
     }
 
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+
+        // 操作説明柱を非表示
+        howTo.SetActive(false);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        CheckPinch checkPinch = guideDialog.GetComponent<CheckPinch>();
-
         // 左手の掴むポーズイベントを購読
         checkPinch.OnLeftCheckAsync
             .Subscribe(async _ =>
@@ -218,6 +206,9 @@ public class EntranceRoom : PassthroughRoom
             {
                 // 砲塔の初期化
                 InitializeCannon(false);
+
+                // 操作説明板の表示
+                howTo.gameObject.SetActive(true);
 
                 // ランダムボックスの破壊
                 randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
@@ -268,13 +259,29 @@ public class EntranceRoom : PassthroughRoom
     // Update is called once per frame
     void Update()
     {
-#if UNITY_EDITOR
-        //デバック用コード
-        if (Input.GetKeyDown(KeyCode.P))
+
+    }
+
+
+    /// <summary>
+    /// OVRSceneAnchorオブジェクトを保持し、初期表示設定を行う
+    /// </summary>
+    /// <param name="classificationName"></param>
+    /// <param name="sceneAnchor"></param>
+    /// <param name="activeself"></param>
+    private void SetSceneAnchorClassification(string classificationName, OVRSceneAnchor sceneAnchor, bool activeself = true)
+    {
+        SceneAnchorClassification sceneAnchorClassification;
+
+        sceneAnchorClassification = GetSceneAnchorClassification(classificationName);
+        if (sceneAnchorClassification == null)
         {
-            PunchRandomBox();
+            sceneAnchorClassification = new(classificationName, new());
+            sceneAnchorClassifications.Add(sceneAnchorClassification);
         }
-#endif
+        sceneAnchorClassification.anchors.Add(sceneAnchor);
+
+        sceneAnchor.gameObject.SetActive(activeself);   // 初期表示設定
     }
 
     private void EnableRandomBox(Vector3 position, Quaternion rotation)
@@ -284,7 +291,7 @@ public class EntranceRoom : PassthroughRoom
     }
 
     /// <summary>
-    /// ランダムボックスをパンチした際の処理
+    /// はてなボックスをパンチした際の処理
     /// </summary>
     public void PunchRandomBox()
     {
@@ -310,7 +317,7 @@ public class EntranceRoom : PassthroughRoom
         AudioClip orderComming = GetSE("OrderComming");
         List<OVRSceneAnchor> doorFrames = GetSceneAnchorClassification(OVRSceneManager.Classification.DoorFrame).anchors;
 
-        guideDialog.SetActive(false);
+        information.SetActive(false);
 
         foreach (OVRSceneAnchor doorFrame in doorFrames)
         {
@@ -372,8 +379,8 @@ public class EntranceRoom : PassthroughRoom
         toVirtual.gameObject.transform.position = new Vector3(player.position.x, 0, player.position.z);
         toVirtual.gameObject.SetActive(true);
 
-        // ランダムボックスをプレイヤーの後ろ方向に表示する
-        EnableRandomBox(GetPlayerForwardPosition(-1f, 1.6f), Quaternion.identity);
+        // はてなボックスをプレイヤーの後ろ方向に表示する
+        EnableRandomBox(GetPlayerForwardPosition(-1f, 1.8f), Quaternion.identity);
         await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
         await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: token);
         BGMPlay();
