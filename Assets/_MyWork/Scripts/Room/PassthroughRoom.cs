@@ -212,6 +212,19 @@ public abstract class PassthroughRoom : MonoBehaviour
             (new Vector3(player.forward.x, 0, player.forward.z).normalized) * forwadOffset;
     }
 
+    /// <summary>
+    /// プレイヤー初期位置の前方座標を取得する
+    /// </summary>
+    /// <param name="forwadOffset"></param>
+    /// <param name="yOffset"></param>
+    /// <returns></returns>
+    protected Vector3 GetPlayerInitialForwardPosition(float forwadOffset, float yOffset)
+    {
+        return GameStateManager.Instance.initialPlayerPosition + new Vector3(0, yOffset, 0)
+            + GameStateManager.Instance.initialPlayerDirection * forwadOffset;
+    }
+
+
     protected void ConfigureCannon()
     {
         GunController gunController = cannon.GetComponent<GunController>();

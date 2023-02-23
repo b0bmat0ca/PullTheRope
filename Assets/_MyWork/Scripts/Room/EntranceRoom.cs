@@ -40,7 +40,7 @@ public class EntranceRoom : PassthroughRoom
 
     [Header("はてなボックス"), SerializeField] private GameObject randomBox;
 
-    [Header("操作説明柱"), SerializeField] private GameObject howTo;
+    [Header("操作説明タブレット"), SerializeField] private GameObject howToTablet;
 
     [Header("OK演出"), SerializeField] private DamageNumber okTextPrefab;
     private bool triggerGrabbed = false;
@@ -135,6 +135,9 @@ public class EntranceRoom : PassthroughRoom
         // 動画の再生開始を待つ
         await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: token);
 
+        GameStateManager.Instance.initialPlayerPosition = new Vector3(player.position.x, 0, player.position.z);
+        GameStateManager.Instance.initialPlayerDirection = new Vector3(player.forward.x, 0, player.forward.z).normalized;
+
         information.transform.SetPositionAndRotation(GetPlayerForwardPosition(1.5f, 0),
             Quaternion.Euler(new(0, player.eulerAngles.y, 0)));
 
@@ -171,8 +174,8 @@ public class EntranceRoom : PassthroughRoom
     {
         base.OnDisable();
 
-        // 操作説明柱を非表示
-        howTo.SetActive(false);
+        // 操作説明タブレットを非表示
+        howToTablet.SetActive(false);
     }
 
     // Start is called before the first frame update
@@ -207,8 +210,7 @@ public class EntranceRoom : PassthroughRoom
                 // 砲塔の初期化
                 InitializeCannon(false);
 
-                // 操作説明板の表示
-                howTo.gameObject.SetActive(true);
+                SEPlay(GetSE("HowTo"));
 
                 // ランダムボックスの破壊
                 randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
@@ -379,8 +381,8 @@ public class EntranceRoom : PassthroughRoom
         toVirtual.gameObject.transform.position = new Vector3(player.position.x, 0, player.position.z);
         toVirtual.gameObject.SetActive(true);
 
-        // はてなボックスをプレイヤーの後ろ方向に表示する
-        EnableRandomBox(GetPlayerForwardPosition(-1f, 1.8f), Quaternion.identity);
+        // はてなボックスをプレイヤーの初期位置前方に表示する
+        EnableRandomBox(GetPlayerInitialForwardPosition(1f, 1.8f), Quaternion.identity);
         await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
         await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: token);
         BGMPlay();

@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _name: Title_SM_PolygonPrototype_Prop_Target_03
   point: 0
-  enableLookAt: 0
+  enableLookAt: 1
+  enableHandDestroy: 0
   enableRigidBody: 0

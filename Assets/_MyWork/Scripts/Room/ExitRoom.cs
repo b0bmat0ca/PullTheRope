@@ -10,12 +10,14 @@ using UnityEngine;
 using UnityEngine.Experimental.XR.Interaction;
 using UniRx;
 using System.Threading;
+using DG.Tweening;
 
 public class ExitRoom : PassthroughRoom
 {
     [SerializeField] RankingInfoPresenter rankingInfoPresenter;
 
     [Header("案内柱"), SerializeField] private Transform information;
+    [SerializeField] private GameObject endCredit;
 
     private bool rankingLoaded = false;
 
@@ -30,15 +32,23 @@ public class ExitRoom : PassthroughRoom
     public override async UniTask StartRoom()
     {
         await UniTask.WaitUntil(() => rankingLoaded, cancellationToken: tokenSource.Token);
-        await EnablePassthrough();
+        information.position = GetPlayerInitialForwardPosition(1f, 0);
+        information.LookAt(new Vector3(player.position.x, 0, player.position.z));
 
-        information.SetPositionAndRotation(GetPlayerForwardPosition(-1.5f, 0),
-            Quaternion.Euler(new(0, player.eulerAngles.y + 180, 0)));
+        await EnablePassthrough();
+        //await UniTask.Delay(TimeSpan.FromSeconds(10),cancellationToken: tokenSource.Token);
+
+        onClearAsyncSubject.OnNext(true);
+        onClearAsyncSubject.OnCompleted();
     }
 
     public override async UniTask<bool> EndRoom()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(1), cancellationToken: tokenSource.Token);
+        await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: tokenSource.Token);
+
+        BGMPlay();
+        rankingInfoPresenter.gameObject.SetActive(false);
+        endCredit.SetActive(true);
 
         return false;
     }

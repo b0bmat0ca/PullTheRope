@@ -240,7 +240,7 @@ Transform:
   - {fileID: 8202959939445249048}
   - {fileID: 6229675457475679515}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8202959939445249051
 GameObject:
@@ -291,7 +291,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: -0.225}
-  m_SizeDelta: {x: 641.01, y: 641.68}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!223 &8202959939445249041
 Canvas:

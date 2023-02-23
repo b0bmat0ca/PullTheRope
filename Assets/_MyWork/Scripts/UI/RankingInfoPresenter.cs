@@ -63,28 +63,18 @@ public class RankingInfoPresenter : MonoBehaviour
         int elementIdx = 0;
         int rank = 1;
 
-        foreach (int score in sortScoreList)
+        // トップ10表示処理
+        foreach (int score in sortScoreList.Take(10))
         {
             if (yourRank.text.Equals("0") && model.Score.Value == score)
             {
-                if (rank <= 10)
-                {
-                    rankingText[elementIdx].font = top10font;
-                    rankingText[elementIdx].UpdateFontAsset();
-                    rankingText[elementIdx].ForceMeshUpdate();
-
-                    rankingText[elementIdx + 1].font = top10font;
-                    rankingText[elementIdx + 1].UpdateFontAsset();
-                    rankingText[elementIdx + 1].ForceMeshUpdate();
-                }
+                rankingText[elementIdx].font = top10font;
+                rankingText[elementIdx].UpdateFontAsset();
+                rankingText[elementIdx].ForceMeshUpdate();
+                rankingText[elementIdx + 1].font = top10font;
+                rankingText[elementIdx + 1].UpdateFontAsset();
+                rankingText[elementIdx + 1].ForceMeshUpdate();
                 yourRank.text = rank.ToString();
-            }
-
-            rank++;
-
-            if (elementIdx > rankingText.Count())
-            {
-                continue;
             }
 
             if (elementIdx != 0 && beforeScore == score)
@@ -94,6 +84,13 @@ public class RankingInfoPresenter : MonoBehaviour
             rankingText[++elementIdx].text = score.ToString();
             beforeScore = score;
             elementIdx++;
+            rank++;
+        }
+
+        // トップ10に入っていない場合の処理
+        if (yourRank.text.Equals("0"))
+        {
+            yourRank.text = scoreList.FindIndex(x => x == model.Score.Value).ToString();
         }
 
         onLoadedAsyncSubject.OnNext(true);

@@ -28,9 +28,13 @@ public class GameStateManager : MonoBehaviour
     public IReadOnlyReactiveProperty<GameState> State => gameState;
     private ReactiveProperty<GameState> gameState = new(GameState.Loading); // ゲームの進行状態
 
+    public Vector3 initialPlayerPosition { get; set; }
+
+    public Vector3 initialPlayerRotation { get; set; }
+
+    public Vector3 initialPlayerDirection { get; set; }
+
     public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
-
-
     // ルームリスト
     [SerializeField] private List<Room> roomList;
     [System.Serializable]
@@ -139,17 +143,13 @@ public class GameStateManager : MonoBehaviour
             {
                 await NextRoom();
             }
-            else
-            {
-                CommonUtility.Instance.TransitionScene();
-            }
         }
     }
 
     private async UniTask NextRoom()
     {
         CancellationToken token = this.GetCancellationTokenOnDestroy();
-        if (roomList[CurrentRoomIndex].ResetRoom)
+        if (!roomList[CurrentRoomIndex].ResetRoom)
         {
             CommonUtility.Instance.FadeOut();
         }
