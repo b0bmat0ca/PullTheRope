@@ -14,7 +14,9 @@ public class RankingInfoPresenter : MonoBehaviour
     private readonly AsyncSubject<bool> onLoadedAsyncSubject = new();
 
     [SerializeField] private TextMeshProUGUI yourScore;
+    [SerializeField] private TextMeshProUGUI yourRank;
     [SerializeField] private RectTransform rankingUI;
+    [Header("Top10入りした場合のフォント"), SerializeField] private TMP_FontAsset top10font;
 
     private StageModel model;
 
@@ -33,6 +35,7 @@ public class RankingInfoPresenter : MonoBehaviour
     {
         model = GameStateManager.Instance.model;
         rankingText = rankingUI.GetComponentsInChildren<TextMeshProUGUI>();
+        yourRank.text = "0";
 
         // プレイした人の数を取得
         playNum = PlayerPrefs.GetInt("PlayNum", 0);
@@ -58,8 +61,32 @@ public class RankingInfoPresenter : MonoBehaviour
         yourScore.text = model.Score.Value.ToString();
         int beforeScore = 0;
         int elementIdx = 0;
-        foreach (int score in sortScoreList.Take(10))
+        int rank = 1;
+
+        foreach (int score in sortScoreList)
         {
+            if (yourRank.text.Equals("0") && model.Score.Value == score)
+            {
+                if (rank <= 10)
+                {
+                    rankingText[elementIdx].font = top10font;
+                    rankingText[elementIdx].UpdateFontAsset();
+                    rankingText[elementIdx].ForceMeshUpdate();
+
+                    rankingText[elementIdx + 1].font = top10font;
+                    rankingText[elementIdx + 1].UpdateFontAsset();
+                    rankingText[elementIdx + 1].ForceMeshUpdate();
+                }
+                yourRank.text = rank.ToString();
+            }
+
+            rank++;
+
+            if (elementIdx > rankingText.Count())
+            {
+                continue;
+            }
+
             if (elementIdx != 0 && beforeScore == score)
             {
                 rankingText[elementIdx].text = string.Empty;

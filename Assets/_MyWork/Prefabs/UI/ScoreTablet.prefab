@@ -258,7 +258,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2768508824082615658}
-  - component: {fileID: 2647885250970532094}
   m_Layer: 0
   m_Name: ScoreTablet
   m_TagString: Untagged
@@ -281,35 +280,8 @@ Transform:
   - {fileID: 2984009218856297857}
   - {fileID: 1089980467739083945}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &2647885250970532094
-LODGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2765962552475997072}
-  serializedVersion: 2
-  m_LocalReferencePoint: {x: 0, y: 0.49999994, z: 0}
-  m_Size: 1.059793
-  m_FadeMode: 0
-  m_AnimateCrossFading: 0
-  m_LastLODIsBillboard: 0
-  m_LODs:
-  - screenRelativeHeight: 0.25
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 2753474148512218482}
-  - screenRelativeHeight: 0.125
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 2753617618760376314}
-  - screenRelativeHeight: 0.01
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 2751973392100576020}
-  m_Enabled: 1
 --- !u!1 &2984009218856297858
 GameObject:
   m_ObjectHideFlags: 0
@@ -1014,6 +986,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1089980467739083945}
+  - component: {fileID: 3289390180398581298}
   m_Layer: 0
   m_Name: window_wood
   m_TagString: Untagged
@@ -1040,6 +1013,33 @@ Transform:
   m_Father: {fileID: 2768508824082615658}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &3289390180398581298
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5346330216474015787}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0, y: 0.49999994, z: 0}
+  m_Size: 1.059793
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.25
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2753474148512218482}
+  - screenRelativeHeight: 0.125
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2753617618760376314}
+  - screenRelativeHeight: 0.01
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 2751973392100576020}
+  m_Enabled: 1
 --- !u!1 &6146430723683006308
 GameObject:
   m_ObjectHideFlags: 0

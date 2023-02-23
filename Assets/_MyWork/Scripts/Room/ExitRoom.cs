@@ -14,7 +14,8 @@ using System.Threading;
 public class ExitRoom : PassthroughRoom
 {
     [SerializeField] RankingInfoPresenter rankingInfoPresenter;
-    [SerializeField] GameObject rankingDialog;
+
+    [Header("案内柱"), SerializeField] private Transform information;
 
     private bool rankingLoaded = false;
 
@@ -31,8 +32,8 @@ public class ExitRoom : PassthroughRoom
         await UniTask.WaitUntil(() => rankingLoaded, cancellationToken: tokenSource.Token);
         await EnablePassthrough();
 
-        rankingDialog.transform.SetPositionAndRotation(GetPlayerForwardPosition(-1f, 1f),
-            Quaternion.Euler(new(rankingDialog.transform.rotation.eulerAngles.x, player.eulerAngles.y + 180, 0)));
+        information.SetPositionAndRotation(GetPlayerForwardPosition(-1.5f, 0),
+            Quaternion.Euler(new(0, player.eulerAngles.y + 180, 0)));
     }
 
     public override async UniTask<bool> EndRoom()
