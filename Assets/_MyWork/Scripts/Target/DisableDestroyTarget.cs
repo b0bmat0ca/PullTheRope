@@ -48,52 +48,54 @@ public class DisableDestroyTarget : Target
     {
         base.Start();
 
-        // 弾丸と衝突したかを購読
+        // 衝突したかを購読
         if (enableRigidBody)
         {
             this.OnCollisionEnterAsObservable()
-                .Subscribe(collision =>
+                .Where(collision => collision.gameObject.CompareTag("Bullet"))
+                .Subscribe(_ =>
                 {
-                    if (collision.gameObject.CompareTag("Bullet"))
+                    audioSource.PlayOneShot(GetSE("BulletHit"));
+                    DestroyTarget().Forget();
+                }).AddTo(this);
+
+            this.OnTriggerEnterAsObservable()
+                .Where(other => other.CompareTag("Hand"))
+                .Subscribe(_ =>
+                {
+                    if (!audioSource.isPlaying)
                     {
-                        audioSource.PlayOneShot(GetSE("BulletHit"));
-                        DestroyTarget().Forget();
+                        audioSource.PlayOneShot(GetSE("HandHit"));
                     }
-                    else if (collision.gameObject.name.StartsWith("Hand"))
+                    if (enableHandDestroy)
                     {
-                        if (!audioSource.isPlaying)
-                        {
-                            audioSource.PlayOneShot(GetSE("HandHit"));
-                        }
-                        if (enableHandDestroy)
-                        {
-                            DestroyTarget().Forget();
-                        }
+                        DestroyTarget().Forget();
                     }
                 }).AddTo(this);
         }
         else
         {
             colider.OnCollisionEnterAsObservable()
+                .Where(collision => collision.gameObject.CompareTag("Bullet"))
                 .Subscribe(collision =>
                 {
-                    if (collision.gameObject.CompareTag("Bullet"))
+                    audioSource.PlayOneShot(GetSE("BulletHit"));
+                    DestroyTarget().Forget();
+
+                }).AddTo(this);
+
+            colider.OnTriggerEnterAsObservable()
+                .Where(other => other.CompareTag("Hand"))
+                .Subscribe(_ =>
+                {
+                    if (!audioSource.isPlaying)
                     {
-                        audioSource.PlayOneShot(GetSE("BulletHit"));
+                        audioSource.PlayOneShot(GetSE("HandHit"));
+                    }
+                    if (enableHandDestroy)
+                    {
                         DestroyTarget().Forget();
                     }
-                    else if (collision.gameObject.name.StartsWith("Hand"))
-                    {
-                        if (!audioSource.isPlaying)
-                        {
-                            audioSource.PlayOneShot(GetSE("HandHit"));
-                        }
-                        if (enableHandDestroy)
-                        {
-                            DestroyTarget().Forget();
-                        }
-                    }
-
                 }).AddTo(this);
         }
 

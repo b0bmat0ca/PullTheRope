@@ -9,6 +9,7 @@ TagManager:
   - LeftFinger
   - RightFinger
   - SpawnParent
+  - Hand
   layers:
   - Default
   - TransparentFX

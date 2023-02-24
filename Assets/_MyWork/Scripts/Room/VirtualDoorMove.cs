@@ -41,7 +41,7 @@ public class VirtualDoorMove : MonoBehaviour
     void Start()
     {
         handleCollider.OnTriggerEnterAsObservable()
-                .Where(other => other.name.StartsWith("Hand"))
+                .Where(other => other.CompareTag("Hand"))
                 .Subscribe(async _ =>
                 {
                     if (onDoorOpen.Value)

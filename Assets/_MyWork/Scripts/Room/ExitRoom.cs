@@ -36,7 +36,6 @@ public class ExitRoom : PassthroughRoom
         information.LookAt(new Vector3(player.position.x, 0, player.position.z));
 
         await EnablePassthrough();
-        //await UniTask.Delay(TimeSpan.FromSeconds(10),cancellationToken: tokenSource.Token);
 
         onClearAsyncSubject.OnNext(true);
         onClearAsyncSubject.OnCompleted();
@@ -44,7 +43,7 @@ public class ExitRoom : PassthroughRoom
 
     public override async UniTask<bool> EndRoom()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(10), cancellationToken: tokenSource.Token);
+        await UniTask.Delay(TimeSpan.FromSeconds(16), cancellationToken: tokenSource.Token);
 
         BGMPlay();
         rankingInfoPresenter.gameObject.SetActive(false);
