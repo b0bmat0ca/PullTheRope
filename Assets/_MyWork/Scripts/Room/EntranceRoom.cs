@@ -335,7 +335,6 @@ public class EntranceRoom : PassthroughRoom
 
                     await UniTask.Delay(TimeSpan.FromSeconds(3), cancellationToken: token);
                     await DisablePassthrough(token);
-                    doorFrame.gameObject.SetActive(false);
                 }).AddTo(this);
         }
 

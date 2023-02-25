@@ -248,6 +248,7 @@ public class StageRoom : PassthroughRoom
 
             VirtualDoorMove doorMove = doorFrame.GetComponent<VirtualDoorMove>();
             doorMove.depthOccluder.material = passthroughMaterial;  // 現実世界表示用マテリアル
+            doorMove.doorOpenAngle = -doorMove.doorOpenAngle; // 開閉方向を入る時と逆にする
             doorMove.OnDoorOpen
                 .Where(x => x)
                 .Subscribe(async _ =>

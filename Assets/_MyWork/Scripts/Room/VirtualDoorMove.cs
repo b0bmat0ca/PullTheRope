@@ -14,6 +14,7 @@ public class VirtualDoorMove : MonoBehaviour
     private ReactiveProperty<bool> onDoorOpen = new(false);
 
     public MeshRenderer depthOccluder;
+    [Range(-90, 90)] public float doorOpenAngle = -90;
 
     [SerializeField] private Transform door;
     [SerializeField] private BoxCollider handleCollider;
@@ -29,12 +30,8 @@ public class VirtualDoorMove : MonoBehaviour
     private void OnEnable()
     {
         depthOccluder.gameObject.SetActive(false);
-    }
-
-    private void OnDisable()
-    {
         onDoorOpen.Value = false;
-        door.transform.localEulerAngles = Vector3.zero;
+        door.eulerAngles = Vector3.zero;
     }
 
     // Start is called before the first frame update
@@ -51,7 +48,7 @@ public class VirtualDoorMove : MonoBehaviour
                     onDoorOpen.Value = true;
                     depthOccluder.gameObject.SetActive(true);
                     audioSource.Play();
-                    await door.DORotate(new(0, -90, 0), audioSource.clip.length);
+                    await door.DORotate(new(0, doorOpenAngle, 0), audioSource.clip.length);
                 }).AddTo(this);
     }
 
