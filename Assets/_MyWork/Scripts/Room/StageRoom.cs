@@ -26,7 +26,6 @@ public class StageRoom : PassthroughRoom
     [Header("HUDキャンバス"), SerializeField] private GameObject hudCanvas;
     [Header("HUDテキスト"), SerializeField] private TextMeshProUGUI hudText;
     [Header("制限時間"), SerializeField] private int time = 60;
-    [Header("制限時間、スコアを表示するUI"), SerializeField] private GameObject scoreDialog;
     [Header("ターゲット生成位置"), SerializeField] private Transform spawnParent;
 
     [Header("パススルー表示用マテリアル"), SerializeField] private Material passthroughMaterial;
