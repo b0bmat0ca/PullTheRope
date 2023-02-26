@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using TMPro;
-using UnityEngine;
 using UniRx;
-using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine;
 
 public class PlayInfoPresenter : MonoBehaviour
 {

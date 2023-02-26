@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -26,7 +25,14 @@ public class CreditTitle : MonoBehaviour
     // Start is called before the first frame update
     async void Start()
     {
-        await DisplayCredit(this.GetCancellationTokenOnDestroy());
+        try
+        {
+            await DisplayCredit(this.GetCancellationTokenOnDestroy());
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
     }
 
     // Update is called once per frame
@@ -39,7 +45,8 @@ public class CreditTitle : MonoBehaviour
     {
         bool developSection = false;
 
-        _ = title.GetComponent<RectTransform>().DOAnchorPos(new(0, 100), 11).SetEase(Ease.Linear);
+        title.GetComponent<RectTransform>().DOAnchorPos(new(0, 100), 11).SetEase(Ease.Linear)
+            .ToUniTask(cancellationToken: token).Forget();
         await UniTask.Delay(TimeSpan.FromSeconds(fadeInTime * 2), cancellationToken: token);
 
         foreach (CreditContent contentItem in contentList)
@@ -49,12 +56,14 @@ public class CreditTitle : MonoBehaviour
 
             if (contentItem != contentList.Last())
             {
-                _ = subTitle.GetComponent<RectTransform>().DOAnchorPos(new(0, 100), 11).SetEase(Ease.Linear);
+                subTitle.GetComponent<RectTransform>().DOAnchorPos(new(0, 100), 11).SetEase(Ease.Linear)
+                    .ToUniTask(cancellationToken: token).Forget();
             }
             else
             {
                 developSection = true;
-                _ = subTitle.GetComponent<RectTransform>().DOAnchorPos(new(0, -400), 5).SetEase(Ease.Linear);
+                subTitle.GetComponent<RectTransform>().DOAnchorPos(new(0, -400), 5).SetEase(Ease.Linear)
+                    .ToUniTask(cancellationToken: token).Forget();
             }
             
             await UniTask.Delay(TimeSpan.FromSeconds(fadeInTime), cancellationToken: token);
@@ -66,13 +75,14 @@ public class CreditTitle : MonoBehaviour
 
                 if (!developSection)
                 {
-                    _ = obj.GetComponent<RectTransform>().DOAnchorPos(new(0, 100), 11).SetEase(Ease.Linear);
-
+                    obj.GetComponent<RectTransform>().DOAnchorPos(new(0, 100), 11).SetEase(Ease.Linear)
+                        .ToUniTask(cancellationToken: token).Forget();
                     await UniTask.Delay(TimeSpan.FromSeconds(fadeInTime), cancellationToken: token);
                 }
                 else
                 {
-                    _ = obj.GetComponent<RectTransform>().DOAnchorPos(new(0, -500), 4).SetEase(Ease.Linear);
+                    await obj.GetComponent<RectTransform>().DOAnchorPos(new(0, -500), 4).SetEase(Ease.Linear)
+                        .ToUniTask(cancellationToken: token);
                 }
             }
 

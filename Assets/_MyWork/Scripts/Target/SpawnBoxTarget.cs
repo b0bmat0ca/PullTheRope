@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -50,14 +50,15 @@ public class SpawnBoxTarget : MonoBehaviour
 
     private async  UniTaskVoid SpawnTarget()
     {
+        CancellationToken token = this.GetCancellationTokenOnDestroy();
         while (true)
         {
             // 制限時間外は、生成しない
             if (model.Time.Value <= 0)
             {
-                await UniTask.WaitUntil(() => model.Time.Value > 0, cancellationToken: this.GetCancellationTokenOnDestroy());
+                await UniTask.WaitUntil(() => model.Time.Value > 0, cancellationToken: token);
             }
-            await UniTask.Delay(TimeSpan.FromSeconds(Random.Range(minSpawnTime, maxSpawnTime)), cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.Delay(TimeSpan.FromSeconds(Random.Range(minSpawnTime, maxSpawnTime)), cancellationToken: token);
             TargetMap target = targetList[Random.Range(0, targetList.Count)];
             GameObject obj = Instantiate(target.Target, transform.position + new Vector3(0, target.OffsetY, 0), Quaternion.identity);
             obj.SetActive(false);
@@ -65,7 +66,7 @@ public class SpawnBoxTarget : MonoBehaviour
             obj.transform.SetParent(spawnParent);
             obj.SetActive(true);
             audioSource.Play();
-            await UniTask.WaitUntil(() => obj == null, cancellationToken: this.GetCancellationTokenOnDestroy());
+            await UniTask.WaitUntil(() => obj == null, cancellationToken: token);
         }
     }
 }

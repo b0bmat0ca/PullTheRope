@@ -1,13 +1,10 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using UniRx.Triggers;
+using DamageNumbersPro;
 using UniRx;
 using UnityEngine;
-using System;
-using DamageNumbersPro;
-using DG.Tweening;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class Target : MonoBehaviour

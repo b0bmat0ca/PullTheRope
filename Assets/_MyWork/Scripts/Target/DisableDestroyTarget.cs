@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UniRx;
-using Cysharp.Threading.Tasks;
-using System;
-using UniRx.Triggers;
-using Oculus.Interaction;
+﻿using System;
 using System.Linq;
+using Cysharp.Threading.Tasks;
+using UniRx;
+using UniRx.Triggers;
+using UnityEngine;
 
 public class DisableDestroyTarget : Target
 {

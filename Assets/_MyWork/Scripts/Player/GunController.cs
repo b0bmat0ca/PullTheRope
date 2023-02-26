@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Obi;
+﻿using Obi;
 using UniRx;
-using System;
+using UnityEngine;
 
 public class GunController : MonoBehaviour
 {
@@ -105,7 +102,7 @@ public class GunController : MonoBehaviour
     {
 #if !UNITY_EDITOR
         // 握られていない場合は、発射しない
-        if (!inputProvider.IsTriggerGrab.Value)
+        if (!(inputProvider.IsTriggerGrab.Value && inputProvider.IsTurretGrab.Value))
         {
             return;
         }

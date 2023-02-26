@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UniRx;
-using UnityEngine;
-using UniRx.Triggers;
 using Cysharp.Threading.Tasks;
-using DamageNumbersPro.Demo;
 using DamageNumbersPro;
-using Unity.VisualScripting;
-using UnityEngine.UIElements;
+using UniRx;
+using UniRx.Triggers;
+using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class CheckPinch : MonoBehaviour

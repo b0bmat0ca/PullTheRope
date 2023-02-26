@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using UniRx.Triggers;
-using Unity.VisualScripting;
-using UnityEngine;
 using UniRx;
+using UniRx.Triggers;
+using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
 public class ObstacleTarget : MonoBehaviour

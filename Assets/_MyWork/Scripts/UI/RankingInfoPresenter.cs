@@ -1,12 +1,9 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using System.Linq;
-using UnityEngine;
 using TMPro;
-using System;
 using UniRx;
-using System.Runtime.CompilerServices;
+using UnityEngine;
 
 public class RankingInfoPresenter : MonoBehaviour
 {

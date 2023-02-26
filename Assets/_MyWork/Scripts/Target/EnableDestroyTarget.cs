@@ -1,14 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
+using Cysharp.Threading.Tasks;
 using RayFire;
 using UniRx;
 using UniRx.Triggers;
-using Cysharp.Threading.Tasks;
-using System;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
-using Unity.VisualScripting;
-using System.Threading;
+using UnityEngine;
 
 public class EnableDestroyTarget : Target
 {

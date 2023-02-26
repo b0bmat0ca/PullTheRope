@@ -22,7 +22,6 @@ public class GameStateManager : MonoBehaviour
 
     [SerializeField] private OVRSceneManager sceneManager;
 
-
     [Header("制限時間、スコアを管理するモデル")] public StageModel model;
 
     public IReadOnlyReactiveProperty<GameState> State => gameState;
@@ -87,26 +86,23 @@ public class GameStateManager : MonoBehaviour
         OVRManager.eyeFovPremultipliedAlphaModeEnabled = false;
 #endif
 
-        // ゲームの進行状態を購読する
-        gameState.Subscribe(_ => OnChangeState()).AddTo(this);
+        try
+        {
+            // ゲームの進行状態を購読する
+            gameState.Subscribe(_ => OnChangeState()).AddTo(this);
 
-        // CenterEyeAnchorの初期化が終わるまで待つ
-        await UniTask.WaitUntil(() => 
-        player.position != Vector3.zero && CommonUtility.Instance != null, cancellationToken: this.GetCancellationTokenOnDestroy());
+            // CenterEyeAnchorの初期化が終わるまで待つ
+            await UniTask.WaitUntil(() =>
+            player.position != Vector3.zero && CommonUtility.Instance != null
+            , cancellationToken: this.GetCancellationTokenOnDestroy());
 
-        // ルームの開始
-        currentRoom = roomList[CurrentRoomIndex].Instance;
-        currentRoom.gameObject.SetActive(true);
-        currentRoom.OnInitializeAsync
-            .Subscribe(async _ =>
-            {
-                await currentRoom.StartRoom();
-
-                // 開始状態に設定
-                gameState.Value = GameState.Start;
-            }).AddTo(this);
-        currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
-        sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
+            // ルームの開始
+            InitRoom(CurrentRoomIndex);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }   
     }
 
     // Update is called once per frame
@@ -160,10 +156,19 @@ public class GameStateManager : MonoBehaviour
         currentRoom.gameObject.SetActive(false);
 
         // 次の部屋の設定
-        currentRoom = roomList[++CurrentRoomIndex].Instance;
+        InitRoom(++CurrentRoomIndex);
+    }
+
+    /// <summary>
+    /// ルームの初期化処理
+    /// </summary>
+    /// <param name="roomIndex"></param>
+    private void InitRoom(int roomIndex)
+    {
+        currentRoom = roomList[roomIndex].Instance;
         currentRoom.gameObject.SetActive(true);
         currentRoom.OnInitializeAsync
-            .Subscribe(async _ => 
+            .Subscribe(async _ =>
             {
                 await currentRoom.StartRoom();
 
@@ -171,6 +176,16 @@ public class GameStateManager : MonoBehaviour
                 gameState.Value = GameState.Start;
             }).AddTo(this);
         currentRoom.Initialize(player, leftHand, rightHand, leftHandGrab, rightHandGrab, cannonParent, cannonPrefab);
-        currentRoom.InitializRoom();
+
+        if (roomIndex == 0)
+        {
+            // Entrance Roomの場合のみ
+            sceneManager.SceneModelLoadedSuccessfully += currentRoom.InitializRoom;
+        }
+        else
+        {
+            currentRoom.InitializRoom();
+        }
+        
     }
 }
