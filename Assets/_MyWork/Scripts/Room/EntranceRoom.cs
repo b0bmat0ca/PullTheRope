@@ -1,25 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Oculus.Interaction.HandGrab;
-using Unity.VisualScripting;
-using UnityEngine;
-using UnityEngine.Experimental.XR.Interaction;
-using Cysharp.Threading.Tasks;
-using UniRx;
-using DG.Tweening;
-using UnityEngine.Video;
-using UnityEngine.UI;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using DamageNumbersPro;
-using Unity.VisualScripting.Antlr3.Runtime;
-using UniRx.Triggers;
-using Oculus.Interaction;
-using TMPro;
-using Cysharp.Threading.Tasks.CompilerServices;
+using DG.Tweening;
+using UniRx;
+using UnityEngine;
+using UnityEngine.Video;
 
 public class EntranceRoom : PassthroughRoom
 {
@@ -135,8 +123,8 @@ public class EntranceRoom : PassthroughRoom
         // 動画の再生開始を待つ
         await UniTask.WaitUntil(() => videoPlayer.isPlaying, cancellationToken: token);
 
-        GameStateManager.Instance.initialPlayerPosition = new Vector3(player.position.x, 0, player.position.z);
-        GameStateManager.Instance.initialPlayerDirection = new Vector3(player.forward.x, 0, player.forward.z).normalized;
+        initialPlayerPosition = new Vector3(player.position.x, 0, player.position.z);
+        initialPlayerDirection = new Vector3(player.forward.x, 0, player.forward.z).normalized;
 
         information.transform.SetPositionAndRotation(GetPlayerForwardPosition(1.5f, 0),
             Quaternion.Euler(new(0, player.eulerAngles.y, 0)));

@@ -30,7 +30,7 @@ public class RankingInfoPresenter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        model = GameStateManager.Instance.model;
+        model = CommonUtility.Instance.model;
         rankingText = rankingUI.GetComponentsInChildren<TextMeshProUGUI>();
         yourRank.text = "0";
 
@@ -47,6 +47,7 @@ public class RankingInfoPresenter : MonoBehaviour
         scoreList.Add(model.Score.Value);
         PlayerPrefs.SetInt("PlayNum", ++playNum);
         PlayerPrefs.SetInt($"Player{playNum}", model.Score.Value);
+        PlayerPrefs.Save();
 
         // 重複スコアを弾く
         //scoreList = scoreList.Distinct().ToList();

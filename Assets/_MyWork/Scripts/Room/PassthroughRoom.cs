@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Oculus.Interaction.HandGrab;
-using Oculus.Platform.Samples.VrHoops;
 using UniRx;
 using UnityEngine;
-using TMPro;
-using System.Threading;
-using UnityEngine.Timeline;
 
 [RequireComponent(typeof(AudioSource))]
 public abstract class PassthroughRoom : MonoBehaviour
@@ -18,6 +14,10 @@ public abstract class PassthroughRoom : MonoBehaviour
 
     public IObservable<bool> OnClearAsync => onClearAsyncSubject; // ルームクリア通知用
     protected readonly AsyncSubject<bool> onClearAsyncSubject = new();
+
+    protected Vector3 initialPlayerPosition { get; set; }
+
+    protected Vector3 initialPlayerDirection { get; set; }
 
     protected CancellationTokenSource tokenSource = new();
 
@@ -105,7 +105,7 @@ public abstract class PassthroughRoom : MonoBehaviour
     }
 
     /// <summary>
-    /// SceneAnchorを種別毎に取得するクラス
+    /// SceneAnchorを種別毎に取得
     /// </summary>
     /// <param name="classification"></param>
     /// <returns></returns>
@@ -121,6 +121,16 @@ public abstract class PassthroughRoom : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Rommの初期化
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="leftHand"></param>
+    /// <param name="rightHand"></param>
+    /// <param name="leftHandGrab"></param>
+    /// <param name="rightHandGrab"></param>
+    /// <param name="cannonParent"></param>
+    /// <param name="cannonPrefab"></param>
     public virtual void Initialize(Transform player, OVRHand leftHand, OVRHand rightHand
         , HandGrabInteractor leftHandGrab, HandGrabInteractor rightHandGrab
         ,Transform cannonParent, GameObject cannonPrefab)
@@ -220,11 +230,13 @@ public abstract class PassthroughRoom : MonoBehaviour
     /// <returns></returns>
     protected Vector3 GetPlayerInitialForwardPosition(float forwadOffset, float yOffset)
     {
-        return GameStateManager.Instance.initialPlayerPosition + new Vector3(0, yOffset, 0)
-            + GameStateManager.Instance.initialPlayerDirection * forwadOffset;
+        return initialPlayerPosition + new Vector3(0, yOffset, 0)
+            + initialPlayerDirection * forwadOffset;
     }
 
-
+    /// <summary>
+    /// 砲台の初期化
+    /// </summary>
     protected void ConfigureCannon()
     {
         GunController gunController = cannon.GetComponent<GunController>();

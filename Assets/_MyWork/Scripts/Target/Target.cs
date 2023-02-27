@@ -97,7 +97,7 @@ public abstract class Target : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        model = GameStateManager.Instance.model;
+        model = CommonUtility.Instance.model;
         mainCamera = Camera.main;
         meshRenderers = GetComponentsInChildren<MeshRenderer>();
         token = tokenSource.Token;

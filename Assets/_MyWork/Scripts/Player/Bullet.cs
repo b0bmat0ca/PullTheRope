@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ public class Bullet : MonoBehaviour
 {
     public ReactiveProperty<bool> onRelease = new(false);   // オブジェクトプールにリリースを許可するフラグ
 
-    [Header("弾丸の生存時間")] public double lifeTIme = 3.0;
+    [NonSerialized] public double lifeTIme = 3.0;
 
     private Rigidbody _rigidbody;
 

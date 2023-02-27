@@ -1,25 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using Cysharp.Threading.Tasks;
-using Oculus.Interaction.HandGrab;
-using Unity.VisualScripting;
-using UnityEngine;
-using UnityEngine.Experimental.XR.Interaction;
-using UniRx;
-using Cysharp.Threading.Tasks.Linq;
-using Cysharp.Threading.Tasks.Triggers;
-using Cysharp.Threading.Tasks.CompilerServices;
 using System.Threading;
-using MText;
+using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using TMPro;
-using Unity.VisualScripting.Antlr3.Runtime;
+using UniRx;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEditor;
-using UniRx.Triggers;
-using DG.Tweening;
 
 public class StageRoom : PassthroughRoom
 {
@@ -145,16 +133,16 @@ public class StageRoom : PassthroughRoom
     protected override void Awake()
     {
         base.Awake();
-        model = GameStateManager.Instance.model;
+        model = CommonUtility.Instance.model;
         hudCanvas.SetActive(false);
     }
 
-    protected override void OnDestroy()
+    protected override async void OnDestroy()
     {
-        base.OnDestroy();
+        await LoadAsset(1, tokenSource.Token);
+        ReleaseAsset();
 
-        //LoadAsset(1, this.GetCancellationTokenOnDestroy()).Forget();
-        ReleaseAsset(stageIndex);
+        tokenSource.Cancel();
     }
 
     // Start is called before the first frame update
@@ -275,7 +263,7 @@ public class StageRoom : PassthroughRoom
     {
         roomStart = false;
 
-        ReleaseAsset(stageIndex);
+        ReleaseAsset();
         await LoadAsset(++stageIndex, token);
         await StartRoom();
     }
@@ -332,28 +320,19 @@ public class StageRoom : PassthroughRoom
         // 弾倉の処理
         bulletPrefab = await Addressables.LoadAssetAsync<GameObject>($"Stage{index}_Bullet").Task;
         bulletSE = await Addressables.LoadAssetAsync<AudioClip>($"Stage{index}_Bullet_SE").Task;
+
+        // 現在のオブジェクトプール内の弾丸のリリースを待つ
+        await UniTask.Delay(TimeSpan.FromSeconds(magazineCartridge.lifeTIme), cancellationToken: token);
+
+        magazineCartridge.bulletPool.Dispose();
         magazineCartridge.ResetBullet(bulletPrefab);
         magazineCartridge.GetComponent<AudioSource>().clip = bulletSE;
-
-        /*
-        MeshFilter[] groundMeshFilter = groundPrefab.GetComponentsInChildren<MeshFilter>();
-        Mesh[] groundMesh = new Mesh[3];
-        for (int i = 0; i < groundMesh.Length; i++)
-        {
-            groundMesh[i] = await Addressables.LoadAssetAsync<Mesh>($"Stage{index}_Ground_LOD{i}").Task;
-        }
-        for (int i = 0; i < groundMeshFilter.Length; i++)
-        {
-            groundMeshFilter[i].mesh = groundMesh[i];
-        }
-        */
     }
 
     /// <summary>
     /// Addressablesでロードしたアセットをリリース
     /// </summary>
-    /// <param name="index"></param>
-    private void ReleaseAsset(int index)
+    private void ReleaseAsset()
     {
         // BGMの処理
         Addressables.Release(audioSources[0].clip);

@@ -8,7 +8,8 @@ using UnityEngine.Pool;
 public class MagazineCartridgeController : MonoBehaviour
 {
     [Header("弾丸の発射位置")] public Transform muzzle;
-    
+    [Header("弾丸の生存時間")] public double lifeTIme = 3.0;
+
     [NonSerialized] public ObjectPool<Bullet> bulletPool;
 
     [Header("弾丸のPrafab"), SerializeField] private GameObject bulletPrefab;
@@ -66,6 +67,7 @@ public class MagazineCartridgeController : MonoBehaviour
         for (int i = 0; i < bullets.Length; i++)
         {
             Bullet bullet = Instantiate(prefab, this.transform).AddComponent<Bullet>();
+            bullet.lifeTIme = this.lifeTIme;
             bullets[i] = bullet;
             bullet.onRelease
                 .Where(x => x)

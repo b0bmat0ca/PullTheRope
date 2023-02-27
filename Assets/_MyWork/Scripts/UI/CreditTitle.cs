@@ -13,7 +13,7 @@ public class CreditTitle : MonoBehaviour
     [SerializeField] private GameObject subTitlePrefab;
     [SerializeField] private GameObject contentPrefab;
     [SerializeField] private List<CreditContent> contentList;
-    [SerializeField] private double fadeInTime = 0.1;
+    [SerializeField] private double fadeInTime = 2;
 
     [Serializable]
     private class CreditContent
@@ -23,16 +23,9 @@ public class CreditTitle : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    async void Start()
+    void Start()
     {
-        try
-        {
-            await DisplayCredit(this.GetCancellationTokenOnDestroy());
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
+        
     }
 
     // Update is called once per frame
@@ -41,7 +34,12 @@ public class CreditTitle : MonoBehaviour
         
     }
 
-    private async UniTask<bool> DisplayCredit(CancellationToken token)
+    /// <summary>
+    /// CreditTitleの表示
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public async UniTask<bool> DisplayCredit(CancellationToken token)
     {
         bool developSection = false;
 
@@ -62,7 +60,7 @@ public class CreditTitle : MonoBehaviour
             else
             {
                 developSection = true;
-                subTitle.GetComponent<RectTransform>().DOAnchorPos(new(0, -400), 5).SetEase(Ease.Linear)
+                subTitle.GetComponent<RectTransform>().DOAnchorPos(new(0, -400), 6).SetEase(Ease.Linear)
                     .ToUniTask(cancellationToken: token).Forget();
             }
             
@@ -81,7 +79,7 @@ public class CreditTitle : MonoBehaviour
                 }
                 else
                 {
-                    await obj.GetComponent<RectTransform>().DOAnchorPos(new(0, -500), 4).SetEase(Ease.Linear)
+                    await obj.GetComponent<RectTransform>().DOAnchorPos(new(0, -500), 5).SetEase(Ease.Linear)
                         .ToUniTask(cancellationToken: token);
                 }
             }

@@ -13,7 +13,7 @@ public class PlayInfoPresenter : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        model = GameStateManager.Instance.model;
+        model = CommonUtility.Instance.model;
 
         model.Time
             .Subscribe(x => time.text = x.ToString())

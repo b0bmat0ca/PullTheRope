@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
 using Cysharp.Threading.Tasks;
-using Oculus.Interaction.HandGrab;
-using Unity.VisualScripting;
-using UnityEngine;
-using UnityEngine.Experimental.XR.Interaction;
 using UniRx;
-using System.Threading;
-using DG.Tweening;
+using UnityEngine;
 
 public class ExitRoom : PassthroughRoom
 {
-    [SerializeField] RankingInfoPresenter rankingInfoPresenter;
+    [SerializeField] private RankingInfoPresenter rankingInfoPresenter;
 
     [Header("案内柱"), SerializeField] private Transform information;
-    [SerializeField] private GameObject endCredit;
+    [SerializeField] private CreditTitle creditTitle;
+    [Header("ランキング表示時間"), SerializeField] private float rankingFadeTime = 10f;
+    [Header("エンドクレジット表示終了時間"), SerializeField] private float creditFadeTime = 20f;
 
     private bool rankingLoaded = false;
 
@@ -43,11 +36,14 @@ public class ExitRoom : PassthroughRoom
 
     public override async UniTask<bool> EndRoom()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(16), cancellationToken: tokenSource.Token);
+        await UniTask.Delay(TimeSpan.FromSeconds(rankingFadeTime), cancellationToken: tokenSource.Token);
 
         BGMPlay();
         rankingInfoPresenter.gameObject.SetActive(false);
-        endCredit.SetActive(true);
+        creditTitle.transform.parent.gameObject.SetActive(true);
+        await creditTitle.DisplayCredit(tokenSource.Token);
+
+        await UniTask.Delay(TimeSpan.FromSeconds(creditFadeTime), cancellationToken: tokenSource.Token);
 
         return false;
     }

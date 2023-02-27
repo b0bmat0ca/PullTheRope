@@ -34,7 +34,7 @@ public class SpawnBoxTarget : MonoBehaviour
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
-        model = GameStateManager.Instance.model;
+        model = CommonUtility.Instance.model;
         if (spawnParent == null)
         {
             spawnParent = GameObject.FindGameObjectWithTag("SpawnParent").transform;

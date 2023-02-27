@@ -1,39 +1,21 @@
-﻿using System.Threading;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Oculus.Interaction.HandGrab;
 using UniRx;
 using UnityEngine;
-using System.Collections;
-using Oculus.Interaction;
-using Oculus.Interaction.DistanceReticles;
-using System.Collections.Generic;
-using System;
-using Unity.VisualScripting.Antlr3.Runtime;
-using Oculus.Platform.Models;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEngine.AddressableAssets;
 
 [RequireComponent(typeof(StageModel))]
 [RequireComponent(typeof(CommonUtility))]
 public class GameStateManager : MonoBehaviour
 {
-    public static GameStateManager Instance;
-
     [SerializeField] private OVRSceneManager sceneManager;
-
-    [Header("制限時間、スコアを管理するモデル")] public StageModel model;
 
     public IReadOnlyReactiveProperty<GameState> State => gameState;
     private ReactiveProperty<GameState> gameState = new(GameState.Loading); // ゲームの進行状態
 
-    public Vector3 initialPlayerPosition { get; set; }
-
-    public Vector3 initialPlayerRotation { get; set; }
-
-    public Vector3 initialPlayerDirection { get; set; }
-
-    public static int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
+    public int CurrentRoomIndex { get; private set; } = 0;   // 現在のルームインデックス
     // ルームリスト
     [SerializeField] private List<Room> roomList;
     [System.Serializable]
@@ -63,13 +45,6 @@ public class GameStateManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null)
-        {
-            Destroy(this);
-            return;
-        }
-        Instance = this;
-
         gameState.AddTo(this);
         gameState.Value = GameState.Loading;
     }
@@ -138,6 +113,10 @@ public class GameStateManager : MonoBehaviour
             if (next)
             {
                 await NextRoom();
+            }
+            else
+            {
+                CommonUtility.Instance.RestartAndroid();
             }
         }
     }

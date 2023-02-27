@@ -37,11 +37,11 @@ RectTransform:
   m_Children:
   - {fileID: 6658112007985541848}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0.22}
+  m_AnchoredPosition: {x: 0, y: 0.22000122}
   m_SizeDelta: {x: 560, y: 977}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!223 &248934393845090199
@@ -390,6 +390,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CreditTitle_Title
+      objectReference: {fileID: 0}
+    - target: {fileID: 3006291559868810263, guid: 55ed85df0e6963346a9cc4e1331142c8,
+        type: 3}
+      propertyPath: m_text
+      value: Pull The Rope Credit
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
