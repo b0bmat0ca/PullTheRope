@@ -15,6 +15,9 @@ public class CheckPinch : MonoBehaviour
     public IObservable<bool> OnRightCheckAsync => onRightCheckAsyncSubject;
     private readonly AsyncSubject<bool> onRightCheckAsyncSubject = new();
 
+    [SerializeField] private OVRHand leftOVRHand;
+    [SerializeField] private OVRHand rightOVRHand;
+
     [SerializeField] private SphereCollider leftThumbCollider;
     [SerializeField] private SphereCollider leftIndexCollider;
     [SerializeField] private SphereCollider rightThumbCollider;
@@ -77,11 +80,13 @@ public class CheckPinch : MonoBehaviour
     private bool visibleLeftFinger = false;
     private bool visibleRightFinger = false;
 
+    private bool checkLeftPinch = false;
+    private bool checkRightPinch = false;
+
     private void Awake()
     {
         onLeftCheckAsyncSubject.AddTo(this);
         onRightCheckAsyncSubject.AddTo(this);
-        mainCamera = Camera.main;
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -90,7 +95,7 @@ public class CheckPinch : MonoBehaviour
     void Start()
     {
         // 左手がカメラに写っているか購読
-        leftIndexCollider.gameObject.GetComponent<VisibleCamera>()
+        leftOVRHand.gameObject.GetComponent<VisibleCamera>()
             .OnVisibleCamera
             .Subscribe(x =>
             {
@@ -98,7 +103,7 @@ public class CheckPinch : MonoBehaviour
             }).AddTo(this);
 
         // 右手がカメラに写っているか購読
-        rightIndexCollider.gameObject.GetComponent<VisibleCamera>()
+        rightOVRHand.gameObject.GetComponent<VisibleCamera>()
             .OnVisibleCamera
             .Subscribe(x =>
             {
@@ -110,7 +115,7 @@ public class CheckPinch : MonoBehaviour
             .Where(other => other.CompareTag("LeftFinger"))
             .Subscribe(async _ =>
             {
-                if (visibleLeftFinger)
+                if (checkLeftPinch)
                 {
                     leftIndexCollider.gameObject.SetActive(false);
                     leftThumbCollider.gameObject.SetActive(false);
@@ -132,7 +137,7 @@ public class CheckPinch : MonoBehaviour
             .Where(other => other.CompareTag("RightFinger"))
             .Subscribe(async _ =>
             {
-                if (visibleRightFinger)
+                if (checkRightPinch)
                 {
                     rightIndexCollider.gameObject.SetActive(false);
                     rightThumbCollider.gameObject.SetActive(false);
@@ -148,11 +153,43 @@ public class CheckPinch : MonoBehaviour
                     onRightCheckAsyncSubject.OnCompleted();
                 }
             }).AddTo(this);
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (leftOVRHand.HandConfidence == OVRHand.TrackingConfidence.High && visibleLeftFinger)
+        {
+            if (leftOVRHand.GetFingerIsPinching(OVRHand.HandFinger.Index))
+            {
+                checkLeftPinch = true;
+            }
+            else
+            {
+                checkLeftPinch = false;
+            }    
+        }
+        else
+        {
+            checkLeftPinch = false;
+        }
+
+        if (rightOVRHand.HandConfidence == OVRHand.TrackingConfidence.High && visibleRightFinger)
+        {
+            if (rightOVRHand.GetFingerIsPinching(OVRHand.HandFinger.Index))
+            {
+                checkRightPinch = true;
+            }
+            else
+            {
+                checkRightPinch = false;
+            }
+        }
+        else
+        {
+            checkRightPinch = false;
+        }
         
     }
 }
