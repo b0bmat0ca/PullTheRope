@@ -1,9 +1,33 @@
-# PullTheRope
-2023/3/4 に virtual reality professional academy 主催で行われる 第12回VRフェスに出展予定作品の
-リポジトリです。
-現在制作中となります。
+# Pull The Rope
+2023/3/4 に virtual reality professional academy 主催で行われた 第12回VRフェスに出展した作品のリポジトリです。<br />
+技術賞を頂くことができました。
+
+権利表記に記載のないアセットは含まれておりませんので、ビルドはできません。
+
+[PullTheRopeQuickSetUpGuide.pdf](https://github.com/b0bmat0ca/PullTheRope/files/10890836/PullTheRopeQuickSetUpGuide.pdf)
+
+# 利用アセット
+* AllSky - 220+ Sky / Skybox Set
+* Cube World - Proto Series
+* Damage Numbers Pro
+* DOTween (HOTween v2)
+* Fantasy Sounds Bundle
+* Interface and Item Sounds
+* Modular 3D Text - In-Game 3D UI System
+* Obi Rope
+* Oculus Integration
+* POLYGON Particle FX - Low Poly 3D Art by Synty
+* POLYGON Prototype - Low Poly 3D Art by Synty
+* RayFire for Unity
+* Selected U3D Japanese Font
+* Ultimate Sound FX Bundle
+* UniRx - Reactive Extensions for Unity
+* UniTask
 
 # 権利表記
+## DoTween
+http://dotween.demigiant.com/license.php#defaultLicense
+
 ## UniTask
 The MIT License (MIT)
 
@@ -49,3 +73,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## 音読さん
+ナレーションに音読さんを利用しています。
+https://ondoku3.com/ja/
