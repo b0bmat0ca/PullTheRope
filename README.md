@@ -1,4 +1,5 @@
 # Pull The Rope
+![PullTheRope_poster](https://user-images.githubusercontent.com/103320037/223654759-b8521928-3aba-48fb-8a43-5cfa33de66cd.png)
 2023/3/4 に virtual reality professional academy 主催で行われた 第12回VRフェスに出展した作品のリポジトリです。<br />
 Meta Questのパススルー機能を利用したハンドトラッキングMRシューティング作品となっております。<br />
 
