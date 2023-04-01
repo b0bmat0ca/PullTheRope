@@ -6,7 +6,6 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 
-[RequireComponent(typeof(AudioSource))]
 public class CheckPinch : MonoBehaviour
 {
     public IObservable<bool> OnLeftCheckAsync => onLeftCheckAsyncSubject; // 左手OK通知用
@@ -15,13 +14,15 @@ public class CheckPinch : MonoBehaviour
     public IObservable<bool> OnRightCheckAsync => onRightCheckAsyncSubject;
     private readonly AsyncSubject<bool> onRightCheckAsyncSubject = new();
 
+    private BoolReactiveProperty checkLeftPinch = new(false);   // 左手でピンチをしたか
+    private BoolReactiveProperty checkRightPinch = new(false);  // 右手でピンチをしたか
+
+    [Header("ピンチポーズ練習回数"), SerializeField] private int startPinchCount = 5;
+    private int leftPinchCount = 0;
+    private int rightPinchCount = 0;
+
     [SerializeField] private OVRHand leftOVRHand;
     [SerializeField] private OVRHand rightOVRHand;
-
-    [SerializeField] private SphereCollider leftThumbCollider;
-    [SerializeField] private SphereCollider leftIndexCollider;
-    [SerializeField] private SphereCollider rightThumbCollider;
-    [SerializeField] private SphereCollider rightIndexCollider;
 
     [SerializeField] private GameObject leftGuideHand;
     [SerializeField] private GameObject rightGuideHand;
@@ -75,19 +76,17 @@ public class CheckPinch : MonoBehaviour
     }
 
     private Camera mainCamera;
-    private AudioSource audioSource;
+    [SerializeField] private AudioSource audioSource;
 
     private bool visibleLeftFinger = false;
     private bool visibleRightFinger = false;
 
-    private bool checkLeftPinch = false;
-    private bool checkRightPinch = false;
+
 
     private void Awake()
     {
         onLeftCheckAsyncSubject.AddTo(this);
         onRightCheckAsyncSubject.AddTo(this);
-        audioSource = GetComponent<AudioSource>();
     }
 
 
@@ -110,16 +109,15 @@ public class CheckPinch : MonoBehaviour
                 visibleRightFinger = x;
             }).AddTo(this);
 
-        // 左手の人差し指と親指の衝突を購読
-        leftIndexCollider.OnTriggerEnterAsObservable()
-            .Where(other => other.CompareTag("LeftFinger"))
+        // 左手の人差し指と親指のピンチポーズを購読
+        checkLeftPinch
+            .Where(x => x)
             .Subscribe(async _ =>
             {
-                if (checkLeftPinch)
+                leftPinchCount++;
+                if (leftGuideHand.activeSelf &&leftPinchCount >=  startPinchCount)
                 {
-                    leftIndexCollider.gameObject.SetActive(false);
-                    leftThumbCollider.gameObject.SetActive(false);
-                    leftGuideHand.gameObject.SetActive(false);
+                    leftGuideHand.SetActive(false);
 
                     AudioClip OKSE = GetSE("OKSE");
                     audioSource.PlayOneShot(OKSE);
@@ -132,16 +130,15 @@ public class CheckPinch : MonoBehaviour
                 }
             }).AddTo(this);
 
-        // 右手の人差し指と親指の衝突を購読
-        rightIndexCollider.OnTriggerEnterAsObservable()
-            .Where(other => other.CompareTag("RightFinger"))
+        // 右手の人差し指と親指のピンチポーズを購読
+        checkRightPinch
+            .Where(x => x)
             .Subscribe(async _ =>
             {
-                if (checkRightPinch)
-                {
-                    rightIndexCollider.gameObject.SetActive(false);
-                    rightThumbCollider.gameObject.SetActive(false);
-                    rightGuideHand.gameObject.SetActive(false);
+                rightPinchCount++;
+                if(rightGuideHand.activeSelf &&rightPinchCount >= startPinchCount)
+                { 
+                    rightGuideHand.SetActive(false);
 
                     AudioClip OKSE = GetSE("OKSE");
                     audioSource.PlayOneShot(OKSE);
@@ -153,7 +150,6 @@ public class CheckPinch : MonoBehaviour
                     onRightCheckAsyncSubject.OnCompleted();
                 }
             }).AddTo(this);
-
     }
 
     // Update is called once per frame
@@ -163,32 +159,32 @@ public class CheckPinch : MonoBehaviour
         {
             if (leftOVRHand.GetFingerIsPinching(OVRHand.HandFinger.Index))
             {
-                checkLeftPinch = true;
+                checkLeftPinch.Value = true;
             }
             else
             {
-                checkLeftPinch = false;
+                checkLeftPinch.Value = false;
             }    
         }
         else
         {
-            checkLeftPinch = false;
+            checkLeftPinch.Value = false;
         }
 
         if (rightOVRHand.HandConfidence == OVRHand.TrackingConfidence.High && visibleRightFinger)
         {
             if (rightOVRHand.GetFingerIsPinching(OVRHand.HandFinger.Index))
             {
-                checkRightPinch = true;
+                checkRightPinch.Value = true;
             }
             else
             {
-                checkRightPinch = false;
+                checkRightPinch.Value = false;
             }
         }
         else
         {
-            checkRightPinch = false;
+            checkRightPinch.Value = false;
         }
         
     }

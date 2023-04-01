@@ -10,6 +10,7 @@ TagManager:
   - RightFinger
   - SpawnParent
   - Hand
+  - Ground
   layers:
   - Default
   - TransparentFX

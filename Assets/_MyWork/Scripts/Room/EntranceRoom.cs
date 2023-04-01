@@ -7,11 +7,15 @@ using DamageNumbersPro;
 using DG.Tweening;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.Video;
 
 public class EntranceRoom : PassthroughRoom
 {
     [SerializeField] private InputEventProviderGrabbable inputEventProvider;
+
+    [Header("デフォルトのAudioMixerSnapshot"), SerializeField] private AudioMixerSnapshot defaultSnapshot;
+    [Header("ナレーション用のAudioMixerSnapshot"), SerializeField] private AudioMixerSnapshot narationSnapshot;
 
     [Header("地面"), SerializeField] private GameObject stageGround;
     [Header("スカイボックス"), SerializeField] private GameObject skySphere;
@@ -35,7 +39,7 @@ public class EntranceRoom : PassthroughRoom
     private bool turretGrabbed = false;
 
     private readonly AsyncSubject<bool> onPunchRandomBoxAsyncSubject = new();
-
+    
     #region PassthroughRoom
     public override void InitializRoom()
     {
@@ -193,15 +197,24 @@ public class EntranceRoom : PassthroughRoom
 
         // ランダムボックスをパンチしたイベントを購読
         onPunchRandomBoxAsyncSubject
-            .Subscribe(_ =>
+            .Subscribe(async _ =>
             {
+                AudioClip howTo = GetSE("HowTo");
+
                 // 砲塔の初期化
                 InitializeCannon(false);
 
-                SEPlay(GetSE("HowTo"));
-
                 // ランダムボックスの破壊
                 randomBox.GetComponent<RandomBoxTarget>().DestroyBox();
+
+                // ナレーション用のAudioMixerSnapshotに切り替え
+                narationSnapshot.TransitionTo(0);
+
+                SEPlay(howTo);
+                await UniTask.Delay(TimeSpan.FromSeconds(howTo.length), cancellationToken: tokenSource.Token);
+
+                // デフォルトのAudioMixerSnapshotに切り替え
+                defaultSnapshot.TransitionTo(0);
             }).AddTo(this);
 
         // 初めてトリガーを握ったイベントを購読
@@ -251,7 +264,6 @@ public class EntranceRoom : PassthroughRoom
     {
 
     }
-
 
     /// <summary>
     /// OVRSceneAnchorオブジェクトを保持し、初期表示設定を行う
@@ -370,7 +382,7 @@ public class EntranceRoom : PassthroughRoom
 
         // はてなボックスをプレイヤーの初期位置前方に表示する
         EnableRandomBox(GetPlayerInitialForwardPosition(1f, 1.8f), Quaternion.identity);
-        await CommonUtility.Instance.FadeIn(this.GetCancellationTokenOnDestroy());
+        await CommonUtility.Instance.FadeIn(token);
         await UniTask.Delay(TimeSpan.FromSeconds(4), cancellationToken: token);
         BGMPlay();
     }

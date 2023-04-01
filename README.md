@@ -2,14 +2,16 @@
 ![PullTheRope_poster](https://user-images.githubusercontent.com/103320037/223654759-b8521928-3aba-48fb-8a43-5cfa33de66cd.png)
 2023/3/4 に virtual reality professional academy 主催で行われた 第12回VRフェスに出展した作品のリポジトリです。<br />
 Meta Questのパススルー機能を利用したハンドトラッキングMRシューティング作品となっております。<br />
+技術賞を頂くことができました。<br />
 
-技術賞を頂くことができました。
+[Pull The Rope Quick SetUp Guide](https://github.com/b0bmat0ca/PullTheRope/files/11011294/PullTheRopeQuickSetUpGuide.pdf)<br />
+※ APKファイルのダウンロードやMeta Questの設定方法が記載されています。
 
-権利表記に記載のないアセットは含まれておりませんので、ビルドはできません。
-
-[PullTheRopeQuickSetUpGuide.pdf](https://github.com/b0bmat0ca/PullTheRope/files/10890836/PullTheRopeQuickSetUpGuide.pdf)
+[プレイ動画](https://youtu.be/ucZR4g9Z8JY)
 
 # 利用アセット
+権利表記に記載のないアセットは含まれておりませんので、ビルドはできません。
+
 * AllSky - 220+ Sky / Skybox Set
 * Cube World - Proto Series
 * Damage Numbers Pro

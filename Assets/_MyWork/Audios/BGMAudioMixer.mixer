@@ -1,0 +1,151 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!245 &-5734986477613720524
+AudioMixerSnapshotController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Naration
+  m_AudioMixer: {fileID: 24100000}
+  m_SnapshotID: bd56cd7c55dc86e4fa822d91abf84338
+  m_FloatValues:
+    3951d89df26af004e92eba85307c8cbb: -10
+  m_TransitionOverrides: {}
+--- !u!243 &-392714559280968261
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BGM
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: 7f80947d010bd374e9bf94fdd3cc41d2
+  m_Children: []
+  m_Volume: 3951d89df26af004e92eba85307c8cbb
+  m_Pitch: ea2d75c97359d644aa1b7780720b381f
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: 850393725156369417}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!244 &-331604976843449923
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 64ff0b8d6f12226498025c1c8dff93e1
+  m_EffectName: Attenuation
+  m_MixLevel: 9874ef2a0dee13b4cb3dabec6aacc17b
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
+--- !u!241 &24100000
+AudioMixerController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: BGMAudioMixer
+  m_OutputGroup: {fileID: 0}
+  m_MasterGroup: {fileID: 24300002}
+  m_Snapshots:
+  - {fileID: 24500006}
+  - {fileID: -5734986477613720524}
+  m_StartSnapshot: {fileID: 24500006}
+  m_SuspendThreshold: -80
+  m_EnableSuspend: 1
+  m_UpdateMode: 0
+  m_ExposedParameters: []
+  m_AudioMixerGroupViews:
+  - guids:
+    - 5158cec8e0c1488438ede304010c380d
+    - 7f80947d010bd374e9bf94fdd3cc41d2
+    - c3d9ebbc7222a864c8b820cc95a9282b
+    name: View
+  m_CurrentViewIndex: 0
+  m_TargetSnapshot: {fileID: -5734986477613720524}
+--- !u!243 &24300002
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Master
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: 5158cec8e0c1488438ede304010c380d
+  m_Children:
+  - {fileID: -392714559280968261}
+  - {fileID: 4493150012147040624}
+  m_Volume: eef9e6c92748172448721928cc5ce7bf
+  m_Pitch: 1c0ac0ace6c7a0849abd85a914ba5bc2
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: 24400004}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!244 &24400004
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 9c511f696ddba8444ba0eb8d6099ee22
+  m_EffectName: Attenuation
+  m_MixLevel: afff28d4050b3b9449f35f8b08fab64e
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
+--- !u!245 &24500006
+AudioMixerSnapshotController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Default
+  m_AudioMixer: {fileID: 24100000}
+  m_SnapshotID: e240edf19d5c8c24eaebb6f1ad725b16
+  m_FloatValues: {}
+  m_TransitionOverrides: {}
+--- !u!244 &850393725156369417
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 049939d58fc6c774a9a45f2a800113cf
+  m_EffectName: Attenuation
+  m_MixLevel: d698556b0a4e49440845084e3244fec9
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
+--- !u!243 &4493150012147040624
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Naration
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: c3d9ebbc7222a864c8b820cc95a9282b
+  m_Children: []
+  m_Volume: becc85e6f7b2cbe4cad416266a437f44
+  m_Pitch: 7854751659c094c4cb926bfd4011e9b4
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: -331604976843449923}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
